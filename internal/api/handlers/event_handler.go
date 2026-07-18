@@ -33,15 +33,28 @@ func NewEventHandler() *EventHandler {
 // @Failure 500 {object} map[string]interface{}
 // @Router /api/v1/events [get]
 func (h *EventHandler) ListEvents(c *gin.Context) {
-	var allEvents []models.ExternalEvent
+	var allEvents = []models.ExternalEvent{}
 
 	eventType := c.Query("type")
+
+	// Helper function to deduplicate
+	seen := make(map[string]bool)
+	addEvents := func(events []models.ExternalEvent) {
+		for _, e := range events {
+			if !seen[e.Title] {
+				seen[e.Title] = true
+				allEvents = append(allEvents, e)
+			}
+		}
+	}
 
 	// Fetch Movies
 	if eventType == "" || eventType == "movie" {
 		movies, err := h.TMDB.FetchMovies()
 		if err == nil {
-			allEvents = append(allEvents, movies...)
+			addEvents(movies)
+		} else {
+			log.Printf("TMDB Error: %v", err)
 		}
 	}
 
@@ -49,7 +62,9 @@ func (h *EventHandler) ListEvents(c *gin.Context) {
 	if eventType == "" || eventType == "concert" {
 		concerts, err := h.Ticketmaster.FetchConcerts()
 		if err == nil {
-			allEvents = append(allEvents, concerts...)
+			addEvents(concerts)
+		} else {
+			log.Printf("Ticketmaster Error: %v", err)
 		}
 	}
 
@@ -57,7 +72,9 @@ func (h *EventHandler) ListEvents(c *gin.Context) {
 	if eventType == "" || eventType == "dining" || eventType == "restaurant" {
 		dining, err := h.Foursquare.FetchDining()
 		if err == nil {
-			allEvents = append(allEvents, dining...)
+			addEvents(dining)
+		} else {
+			log.Printf("Foursquare Error: %v", err)
 		}
 	}
 
