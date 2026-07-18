@@ -50,6 +50,7 @@ func SetupRouter(db *gorm.DB) *gin.Engine {
 	{
 		rooms := v1.Group("/rooms")
 		{
+			rooms.GET("", chatHandler.ListJoinedRooms)
 			rooms.POST("", chatHandler.CreateRoom)
 			rooms.POST("/:id/join", chatHandler.JoinRoom)
 			rooms.GET("/:id/messages", chatHandler.GetMessages)

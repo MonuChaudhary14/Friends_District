@@ -581,6 +581,41 @@ paths:
       tags:
       - users
   /api/v1/rooms:
+    get:
+      description: Get a list of chat rooms that the user is a member of
+      parameters:
+      - description: User Phone
+        in: query
+        name: user_phone
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.ChatRoom'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: List Joined Rooms
+      tags:
+      - chat
     post:
       consumes:
       - application/json

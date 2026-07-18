@@ -245,3 +245,40 @@ func (h *ChatHandler) ShareEvent(c *gin.Context) {
 
 	c.JSON(http.StatusCreated, msg)
 }
+
+// @Summary List Joined Rooms
+// @Description Get a list of chat rooms that the user is a member of
+// @Tags chat
+// @Produce json
+// @Param user_phone query string true "User Phone"
+// @Success 200 {array} models.ChatRoom
+// @Failure 400 {object} map[string]interface{}
+// @Failure 404 {object} map[string]interface{}
+// @Failure 500 {object} map[string]interface{}
+// @Router /api/v1/rooms [get]
+func (h *ChatHandler) ListJoinedRooms(c *gin.Context) {
+	userPhone := c.Query("user_phone")
+	if userPhone == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "user_phone is required"})
+		return
+	}
+
+	var user models.User
+	if err := h.DB.Where("mobile_number = ?", userPhone).First(&user).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
+		return
+	}
+
+	var members []models.ChatRoomMember
+	if err := h.DB.Where("user_id = ?", user.ID).Preload("Room").Find(&members).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch joined rooms"})
+		return
+	}
+
+	rooms := []models.ChatRoom{}
+	for _, member := range members {
+		rooms = append(rooms, member.Room)
+	}
+
+	c.JSON(http.StatusOK, rooms)
+}
