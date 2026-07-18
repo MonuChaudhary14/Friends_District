@@ -114,6 +114,90 @@ func (h *ChatHandler) JoinRoom(c *gin.Context) {
 	c.JSON(http.StatusCreated, member)
 }
 
+type InviteRoomReq struct {
+	InviterPhone string `json:"inviter_phone" binding:"required"`
+	InviteePhone string `json:"invitee_phone" binding:"required"`
+}
+
+// @Summary Invite a user to a chat room
+// @Description Invite a user to join an existing chat room. The inviter must already be a member.
+// @Tags chat
+// @Accept json
+// @Produce json
+// @Param id path int true "Room ID"
+// @Param request body InviteRoomReq true "Inviter and Invitee Phones"
+// @Success 201 {object} models.ChatRoomMember
+// @Failure 400 {object} map[string]interface{}
+// @Failure 403 {object} map[string]interface{}
+// @Failure 404 {object} map[string]interface{}
+// @Failure 500 {object} map[string]interface{}
+// @Router /api/v1/rooms/{id}/invite [post]
+func (h *ChatHandler) InviteToRoom(c *gin.Context) {
+	roomIDStr := c.Param("id")
+	roomID, err := strconv.Atoi(roomIDStr)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid room ID"})
+		return
+	}
+
+	var req InviteRoomReq
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	// Normalize phones
+	normInviter, err := utils.ValidateAndNormalizePhone(req.InviterPhone)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid inviter_phone: " + err.Error()})
+		return
+	}
+	
+	normInvitee, err := utils.ValidateAndNormalizePhone(req.InviteePhone)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid invitee_phone: " + err.Error()})
+		return
+	}
+
+	// Find both users
+	var inviter, invitee models.User
+	if err := h.DB.Where("mobile_number = ?", normInviter).First(&inviter).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Inviter not found"})
+		return
+	}
+	if err := h.DB.Where("mobile_number = ?", normInvitee).First(&invitee).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Invitee not found"})
+		return
+	}
+
+	// Check if inviter is in the room
+	var inviterMembership models.ChatRoomMember
+	if err := h.DB.Where("room_id = ? AND user_id = ?", roomID, inviter.ID).First(&inviterMembership).Error; err != nil {
+		c.JSON(http.StatusForbidden, gin.H{"error": "You must be a member of the room to invite others"})
+		return
+	}
+
+	// Check if invitee is already in the room
+	var inviteeMembership models.ChatRoomMember
+	if err := h.DB.Where("room_id = ? AND user_id = ?", roomID, invitee.ID).First(&inviteeMembership).Error; err == nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "User is already a member of this room"})
+		return
+	}
+
+	member := models.ChatRoomMember{
+		RoomID:   uint(roomID),
+		UserID:   invitee.ID,
+		JoinedAt: time.Now(),
+	}
+
+	if err := h.DB.Create(&member).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to add user to room"})
+		return
+	}
+
+	c.JSON(http.StatusCreated, member)
+}
+
 // @Summary Get room messages
 // @Description Retrieve message history for a chat room
 // @Tags chat

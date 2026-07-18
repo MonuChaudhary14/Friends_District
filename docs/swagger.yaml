@@ -73,6 +73,16 @@ definitions:
       username:
         type: string
     type: object
+  handlers.InviteRoomReq:
+    properties:
+      invitee_phone:
+        type: string
+      inviter_phone:
+        type: string
+    required:
+    - invitee_phone
+    - inviter_phone
+    type: object
   handlers.JoinRoomReq:
     properties:
       user_phone:
@@ -759,6 +769,54 @@ paths:
             additionalProperties: true
             type: object
       summary: Create a chat room
+      tags:
+      - chat
+  /api/v1/rooms/{id}/invite:
+    post:
+      consumes:
+      - application/json
+      description: Invite a user to join an existing chat room. The inviter must already
+        be a member.
+      parameters:
+      - description: Room ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Inviter and Invitee Phones
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.InviteRoomReq'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.ChatRoomMember'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "403":
+          description: Forbidden
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Invite a user to a chat room
       tags:
       - chat
   /api/v1/rooms/{id}/join:

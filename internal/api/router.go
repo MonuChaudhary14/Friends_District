@@ -56,6 +56,7 @@ func SetupRouter(db *gorm.DB) *gin.Engine {
 			rooms.GET("", chatHandler.ListJoinedRooms)
 			rooms.POST("", chatHandler.CreateRoom)
 			rooms.POST("/:id/join", chatHandler.JoinRoom)
+			rooms.POST("/:id/invite", chatHandler.InviteToRoom)
 			rooms.GET("/:id/messages", chatHandler.GetMessages)
 			rooms.GET("/:id/ws", chatHandler.ServeWS)
 			rooms.POST("/:id/share", chatHandler.ShareEvent)
