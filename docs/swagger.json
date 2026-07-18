@@ -1,13 +1,8 @@
 {
     "swagger": "2.0",
     "info": {
-        "description": "This is a friends feature extension backend.",
-        "title": "Friends District API",
-        "contact": {},
-        "version": "1.0"
+        "contact": {}
     },
-    "host": "localhost:8080",
-    "basePath": "/",
     "paths": {
         "/api/v1/bookings": {
             "get": {
@@ -34,7 +29,7 @@
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/district-friends_internal_models.Booking"
+                                "$ref": "#/definitions/models.Booking"
                             }
                         }
                     },
@@ -73,7 +68,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/internal_api_handlers.CreateBookingReq"
+                            "$ref": "#/definitions/handlers.CreateBookingReq"
                         }
                     }
                 ],
@@ -81,7 +76,7 @@
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/district-friends_internal_models.Booking"
+                            "$ref": "#/definitions/models.Booking"
                         }
                     },
                     "400": {
@@ -132,7 +127,7 @@
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/district-friends_internal_models.ExternalEvent"
+                                "$ref": "#/definitions/models.ExternalEvent"
                             }
                         }
                     },
@@ -169,7 +164,7 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/district-friends_internal_models.ExternalEvent"
+                            "$ref": "#/definitions/models.ExternalEvent"
                         }
                     },
                     "400": {
@@ -191,7 +186,7 @@
         },
         "/api/v1/friends": {
             "get": {
-                "description": "Retrieve a list of accepted friends for a user",
+                "description": "Retrieve a list of accepted friends for a user by mobile number",
                 "produces": [
                     "application/json"
                 ],
@@ -201,9 +196,9 @@
                 "summary": "List friends",
                 "parameters": [
                     {
-                        "type": "integer",
-                        "description": "User ID",
-                        "name": "user_id",
+                        "type": "string",
+                        "description": "User Mobile Number",
+                        "name": "user_phone",
                         "in": "query",
                         "required": true
                     }
@@ -214,12 +209,19 @@
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/district-friends_internal_models.User"
+                                "$ref": "#/definitions/handlers.FriendResponse"
                             }
                         }
                     },
                     "400": {
                         "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
                         "schema": {
                             "type": "object",
                             "additionalProperties": true
@@ -237,7 +239,7 @@
         },
         "/api/v1/friends/accept": {
             "post": {
-                "description": "Accept a pending friend request",
+                "description": "Accept a pending friend request using mobile numbers",
                 "consumes": [
                     "application/json"
                 ],
@@ -255,7 +257,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/internal_api_handlers.FriendRequestReq"
+                            "$ref": "#/definitions/handlers.FriendRequestReq"
                         }
                     }
                 ],
@@ -263,7 +265,7 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/district-friends_internal_models.Friendship"
+                            "$ref": "#/definitions/models.Friendship"
                         }
                     },
                     "400": {
@@ -292,7 +294,7 @@
         },
         "/api/v1/friends/request": {
             "post": {
-                "description": "Send a friend request to another user",
+                "description": "Send a friend request to another user using mobile numbers",
                 "consumes": [
                     "application/json"
                 ],
@@ -310,7 +312,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/internal_api_handlers.FriendRequestReq"
+                            "$ref": "#/definitions/handlers.FriendRequestReq"
                         }
                     }
                 ],
@@ -318,7 +320,113 @@
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/district-friends_internal_models.Friendship"
+                            "$ref": "#/definitions/models.Friendship"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/friends/status": {
+            "get": {
+                "description": "Get the current friendship status between two users via mobile numbers",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "friends"
+                ],
+                "summary": "Get friend status",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "User Mobile Number",
+                        "name": "user_phone",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Friend Mobile Number",
+                        "name": "friend_phone",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/profile": {
+            "post": {
+                "description": "Register a new profile with name, email, and mobile number",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "users"
+                ],
+                "summary": "Create a user profile",
+                "parameters": [
+                    {
+                        "description": "Profile Info",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/handlers.CreateProfileRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/models.User"
                         }
                     },
                     "400": {
@@ -358,7 +466,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/internal_api_handlers.CreateRoomReq"
+                            "$ref": "#/definitions/handlers.CreateRoomReq"
                         }
                     }
                 ],
@@ -366,7 +474,7 @@
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/district-friends_internal_models.ChatRoom"
+                            "$ref": "#/definitions/models.ChatRoom"
                         }
                     },
                     "400": {
@@ -413,7 +521,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/internal_api_handlers.JoinRoomReq"
+                            "$ref": "#/definitions/handlers.JoinRoomReq"
                         }
                     }
                 ],
@@ -421,7 +529,7 @@
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/district-friends_internal_models.ChatRoomMember"
+                            "$ref": "#/definitions/models.ChatRoomMember"
                         }
                     },
                     "400": {
@@ -466,7 +574,7 @@
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/district-friends_internal_models.Message"
+                                "$ref": "#/definitions/models.Message"
                             }
                         }
                     },
@@ -514,7 +622,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/internal_api_handlers.ShareEventReq"
+                            "$ref": "#/definitions/handlers.ShareEventReq"
                         }
                     }
                 ],
@@ -522,7 +630,7 @@
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/district-friends_internal_models.Message"
+                            "$ref": "#/definitions/models.Message"
                         }
                     },
                     "400": {
@@ -588,7 +696,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/internal_api_handlers.CreateUserRequest"
+                            "$ref": "#/definitions/handlers.CreateUserRequest"
                         }
                     }
                 ],
@@ -596,7 +704,7 @@
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/district-friends_internal_models.User"
+                            "$ref": "#/definitions/models.User"
                         }
                     },
                     "400": {
@@ -618,7 +726,160 @@
         }
     },
     "definitions": {
-        "district-friends_internal_models.Booking": {
+        "handlers.CreateBookingReq": {
+            "type": "object",
+            "required": [
+                "external_event_id",
+                "external_event_type",
+                "quantity",
+                "user_id"
+            ],
+            "properties": {
+                "booked_for_id": {
+                    "description": "Optional",
+                    "type": "integer"
+                },
+                "external_event_id": {
+                    "type": "string"
+                },
+                "external_event_type": {
+                    "type": "string"
+                },
+                "quantity": {
+                    "type": "integer"
+                },
+                "total_price": {
+                    "type": "number"
+                },
+                "user_id": {
+                    "type": "integer"
+                }
+            }
+        },
+        "handlers.CreateProfileRequest": {
+            "type": "object",
+            "required": [
+                "email",
+                "mobile_number",
+                "name"
+            ],
+            "properties": {
+                "email": {
+                    "type": "string"
+                },
+                "mobile_number": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "username": {
+                    "description": "Optional for profile creation",
+                    "type": "string"
+                }
+            }
+        },
+        "handlers.CreateRoomReq": {
+            "type": "object",
+            "required": [
+                "name"
+            ],
+            "properties": {
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
+        "handlers.CreateUserRequest": {
+            "type": "object",
+            "required": [
+                "email",
+                "username"
+            ],
+            "properties": {
+                "email": {
+                    "type": "string"
+                },
+                "username": {
+                    "type": "string"
+                }
+            }
+        },
+        "handlers.FriendRequestReq": {
+            "type": "object",
+            "required": [
+                "friend_phone",
+                "user_phone"
+            ],
+            "properties": {
+                "friend_phone": {
+                    "type": "string"
+                },
+                "user_phone": {
+                    "type": "string"
+                }
+            }
+        },
+        "handlers.FriendResponse": {
+            "type": "object",
+            "properties": {
+                "created_at": {
+                    "type": "string"
+                },
+                "email": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "mobile_number": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string"
+                },
+                "updated_at": {
+                    "type": "string"
+                },
+                "username": {
+                    "type": "string"
+                }
+            }
+        },
+        "handlers.JoinRoomReq": {
+            "type": "object",
+            "required": [
+                "user_id"
+            ],
+            "properties": {
+                "user_id": {
+                    "type": "integer"
+                }
+            }
+        },
+        "handlers.ShareEventReq": {
+            "type": "object",
+            "required": [
+                "external_event_id",
+                "external_event_type",
+                "user_id"
+            ],
+            "properties": {
+                "external_event_id": {
+                    "type": "string"
+                },
+                "external_event_type": {
+                    "type": "string"
+                },
+                "user_id": {
+                    "type": "integer"
+                }
+            }
+        },
+        "models.Booking": {
             "type": "object",
             "properties": {
                 "booked_for_id": {
@@ -652,7 +913,7 @@
                 }
             }
         },
-        "district-friends_internal_models.ChatRoom": {
+        "models.ChatRoom": {
             "type": "object",
             "properties": {
                 "created_at": {
@@ -669,7 +930,7 @@
                 }
             }
         },
-        "district-friends_internal_models.ChatRoomMember": {
+        "models.ChatRoomMember": {
             "type": "object",
             "properties": {
                 "id": {
@@ -686,7 +947,7 @@
                 }
             }
         },
-        "district-friends_internal_models.ExternalEvent": {
+        "models.ExternalEvent": {
             "type": "object",
             "properties": {
                 "date": {
@@ -723,7 +984,7 @@
                 }
             }
         },
-        "district-friends_internal_models.Friendship": {
+        "models.Friendship": {
             "type": "object",
             "properties": {
                 "created_at": {
@@ -736,7 +997,7 @@
                     "type": "integer"
                 },
                 "status": {
-                    "$ref": "#/definitions/district-friends_internal_models.FriendshipStatus"
+                    "$ref": "#/definitions/models.FriendshipStatus"
                 },
                 "updated_at": {
                     "type": "string"
@@ -746,7 +1007,7 @@
                 }
             }
         },
-        "district-friends_internal_models.FriendshipStatus": {
+        "models.FriendshipStatus": {
             "type": "string",
             "enum": [
                 "pending",
@@ -759,7 +1020,7 @@
                 "StatusDeclined"
             ]
         },
-        "district-friends_internal_models.Message": {
+        "models.Message": {
             "type": "object",
             "properties": {
                 "content": {
@@ -787,7 +1048,7 @@
                 }
             }
         },
-        "district-friends_internal_models.User": {
+        "models.User": {
             "type": "object",
             "properties": {
                 "created_at": {
@@ -799,112 +1060,17 @@
                 "id": {
                     "type": "integer"
                 },
+                "mobile_number": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
                 "updated_at": {
                     "type": "string"
                 },
                 "username": {
                     "type": "string"
-                }
-            }
-        },
-        "internal_api_handlers.CreateBookingReq": {
-            "type": "object",
-            "required": [
-                "external_event_id",
-                "external_event_type",
-                "quantity",
-                "user_id"
-            ],
-            "properties": {
-                "booked_for_id": {
-                    "description": "Optional",
-                    "type": "integer"
-                },
-                "external_event_id": {
-                    "type": "string"
-                },
-                "external_event_type": {
-                    "type": "string"
-                },
-                "quantity": {
-                    "type": "integer"
-                },
-                "total_price": {
-                    "type": "number"
-                },
-                "user_id": {
-                    "type": "integer"
-                }
-            }
-        },
-        "internal_api_handlers.CreateRoomReq": {
-            "type": "object",
-            "required": [
-                "name"
-            ],
-            "properties": {
-                "name": {
-                    "type": "string"
-                }
-            }
-        },
-        "internal_api_handlers.CreateUserRequest": {
-            "type": "object",
-            "required": [
-                "email",
-                "username"
-            ],
-            "properties": {
-                "email": {
-                    "type": "string"
-                },
-                "username": {
-                    "type": "string"
-                }
-            }
-        },
-        "internal_api_handlers.FriendRequestReq": {
-            "type": "object",
-            "required": [
-                "friend_id",
-                "user_id"
-            ],
-            "properties": {
-                "friend_id": {
-                    "type": "integer"
-                },
-                "user_id": {
-                    "type": "integer"
-                }
-            }
-        },
-        "internal_api_handlers.JoinRoomReq": {
-            "type": "object",
-            "required": [
-                "user_id"
-            ],
-            "properties": {
-                "user_id": {
-                    "type": "integer"
-                }
-            }
-        },
-        "internal_api_handlers.ShareEventReq": {
-            "type": "object",
-            "required": [
-                "external_event_id",
-                "external_event_type",
-                "user_id"
-            ],
-            "properties": {
-                "external_event_id": {
-                    "type": "string"
-                },
-                "external_event_type": {
-                    "type": "string"
-                },
-                "user_id": {
-                    "type": "integer"
                 }
             }
         }

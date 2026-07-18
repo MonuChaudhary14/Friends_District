@@ -31,19 +31,28 @@ func SetupRouter(db *gorm.DB) *gin.Engine {
 	})
 
 	v1 := r.Group("/api/v1")
+	// User Routes
+	users := v1.Group("/users")
 	{
-		users := v1.Group("/users")
-		{
-			users.POST("", userHandler.CreateUser)
-		}
+		users.POST("", userHandler.CreateUser)
+	}
 
-		friends := v1.Group("/friends")
-		{
-			friends.POST("/request", friendHandler.SendFriendRequest)
-			friends.POST("/accept", friendHandler.AcceptFriendRequest)
-			friends.GET("", friendHandler.ListFriends)
-		}
+	// Profile Routes
+	profile := v1.Group("/profile")
+	{
+		profile.POST("", userHandler.CreateProfile)
+	}
 
+	// Friend Routes
+	friends := v1.Group("/friends")
+	{
+		friends.POST("/request", friendHandler.SendFriendRequest)
+		friends.POST("/accept", friendHandler.AcceptFriendRequest)
+		friends.GET("", friendHandler.ListFriends)
+		friends.GET("/status", friendHandler.GetFriendStatus)
+	}
+
+	{
 		rooms := v1.Group("/rooms")
 		{
 			rooms.POST("", chatHandler.CreateRoom)

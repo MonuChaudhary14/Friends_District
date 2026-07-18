@@ -40,7 +40,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/district-friends_internal_models.Booking"
+                                "$ref": "#/definitions/models.Booking"
                             }
                         }
                     },
@@ -79,7 +79,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/internal_api_handlers.CreateBookingReq"
+                            "$ref": "#/definitions/handlers.CreateBookingReq"
                         }
                     }
                 ],
@@ -87,7 +87,7 @@ const docTemplate = `{
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/district-friends_internal_models.Booking"
+                            "$ref": "#/definitions/models.Booking"
                         }
                     },
                     "400": {
@@ -138,7 +138,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/district-friends_internal_models.ExternalEvent"
+                                "$ref": "#/definitions/models.ExternalEvent"
                             }
                         }
                     },
@@ -175,7 +175,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/district-friends_internal_models.ExternalEvent"
+                            "$ref": "#/definitions/models.ExternalEvent"
                         }
                     },
                     "400": {
@@ -197,7 +197,7 @@ const docTemplate = `{
         },
         "/api/v1/friends": {
             "get": {
-                "description": "Retrieve a list of accepted friends for a user",
+                "description": "Retrieve a list of accepted friends for a user by mobile number",
                 "produces": [
                     "application/json"
                 ],
@@ -207,9 +207,9 @@ const docTemplate = `{
                 "summary": "List friends",
                 "parameters": [
                     {
-                        "type": "integer",
-                        "description": "User ID",
-                        "name": "user_id",
+                        "type": "string",
+                        "description": "User Mobile Number",
+                        "name": "user_phone",
                         "in": "query",
                         "required": true
                     }
@@ -220,12 +220,19 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/district-friends_internal_models.User"
+                                "$ref": "#/definitions/handlers.FriendResponse"
                             }
                         }
                     },
                     "400": {
                         "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
                         "schema": {
                             "type": "object",
                             "additionalProperties": true
@@ -243,7 +250,7 @@ const docTemplate = `{
         },
         "/api/v1/friends/accept": {
             "post": {
-                "description": "Accept a pending friend request",
+                "description": "Accept a pending friend request using mobile numbers",
                 "consumes": [
                     "application/json"
                 ],
@@ -261,7 +268,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/internal_api_handlers.FriendRequestReq"
+                            "$ref": "#/definitions/handlers.FriendRequestReq"
                         }
                     }
                 ],
@@ -269,7 +276,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/district-friends_internal_models.Friendship"
+                            "$ref": "#/definitions/models.Friendship"
                         }
                     },
                     "400": {
@@ -298,7 +305,7 @@ const docTemplate = `{
         },
         "/api/v1/friends/request": {
             "post": {
-                "description": "Send a friend request to another user",
+                "description": "Send a friend request to another user using mobile numbers",
                 "consumes": [
                     "application/json"
                 ],
@@ -316,7 +323,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/internal_api_handlers.FriendRequestReq"
+                            "$ref": "#/definitions/handlers.FriendRequestReq"
                         }
                     }
                 ],
@@ -324,7 +331,113 @@ const docTemplate = `{
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/district-friends_internal_models.Friendship"
+                            "$ref": "#/definitions/models.Friendship"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/friends/status": {
+            "get": {
+                "description": "Get the current friendship status between two users via mobile numbers",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "friends"
+                ],
+                "summary": "Get friend status",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "User Mobile Number",
+                        "name": "user_phone",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Friend Mobile Number",
+                        "name": "friend_phone",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/profile": {
+            "post": {
+                "description": "Register a new profile with name, email, and mobile number",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "users"
+                ],
+                "summary": "Create a user profile",
+                "parameters": [
+                    {
+                        "description": "Profile Info",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/handlers.CreateProfileRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/models.User"
                         }
                     },
                     "400": {
@@ -364,7 +477,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/internal_api_handlers.CreateRoomReq"
+                            "$ref": "#/definitions/handlers.CreateRoomReq"
                         }
                     }
                 ],
@@ -372,7 +485,7 @@ const docTemplate = `{
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/district-friends_internal_models.ChatRoom"
+                            "$ref": "#/definitions/models.ChatRoom"
                         }
                     },
                     "400": {
@@ -419,7 +532,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/internal_api_handlers.JoinRoomReq"
+                            "$ref": "#/definitions/handlers.JoinRoomReq"
                         }
                     }
                 ],
@@ -427,7 +540,7 @@ const docTemplate = `{
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/district-friends_internal_models.ChatRoomMember"
+                            "$ref": "#/definitions/models.ChatRoomMember"
                         }
                     },
                     "400": {
@@ -472,7 +585,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/district-friends_internal_models.Message"
+                                "$ref": "#/definitions/models.Message"
                             }
                         }
                     },
@@ -520,7 +633,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/internal_api_handlers.ShareEventReq"
+                            "$ref": "#/definitions/handlers.ShareEventReq"
                         }
                     }
                 ],
@@ -528,7 +641,7 @@ const docTemplate = `{
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/district-friends_internal_models.Message"
+                            "$ref": "#/definitions/models.Message"
                         }
                     },
                     "400": {
@@ -594,7 +707,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/internal_api_handlers.CreateUserRequest"
+                            "$ref": "#/definitions/handlers.CreateUserRequest"
                         }
                     }
                 ],
@@ -602,7 +715,7 @@ const docTemplate = `{
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/district-friends_internal_models.User"
+                            "$ref": "#/definitions/models.User"
                         }
                     },
                     "400": {
@@ -624,7 +737,160 @@ const docTemplate = `{
         }
     },
     "definitions": {
-        "district-friends_internal_models.Booking": {
+        "handlers.CreateBookingReq": {
+            "type": "object",
+            "required": [
+                "external_event_id",
+                "external_event_type",
+                "quantity",
+                "user_id"
+            ],
+            "properties": {
+                "booked_for_id": {
+                    "description": "Optional",
+                    "type": "integer"
+                },
+                "external_event_id": {
+                    "type": "string"
+                },
+                "external_event_type": {
+                    "type": "string"
+                },
+                "quantity": {
+                    "type": "integer"
+                },
+                "total_price": {
+                    "type": "number"
+                },
+                "user_id": {
+                    "type": "integer"
+                }
+            }
+        },
+        "handlers.CreateProfileRequest": {
+            "type": "object",
+            "required": [
+                "email",
+                "mobile_number",
+                "name"
+            ],
+            "properties": {
+                "email": {
+                    "type": "string"
+                },
+                "mobile_number": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "username": {
+                    "description": "Optional for profile creation",
+                    "type": "string"
+                }
+            }
+        },
+        "handlers.CreateRoomReq": {
+            "type": "object",
+            "required": [
+                "name"
+            ],
+            "properties": {
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
+        "handlers.CreateUserRequest": {
+            "type": "object",
+            "required": [
+                "email",
+                "username"
+            ],
+            "properties": {
+                "email": {
+                    "type": "string"
+                },
+                "username": {
+                    "type": "string"
+                }
+            }
+        },
+        "handlers.FriendRequestReq": {
+            "type": "object",
+            "required": [
+                "friend_phone",
+                "user_phone"
+            ],
+            "properties": {
+                "friend_phone": {
+                    "type": "string"
+                },
+                "user_phone": {
+                    "type": "string"
+                }
+            }
+        },
+        "handlers.FriendResponse": {
+            "type": "object",
+            "properties": {
+                "created_at": {
+                    "type": "string"
+                },
+                "email": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "mobile_number": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string"
+                },
+                "updated_at": {
+                    "type": "string"
+                },
+                "username": {
+                    "type": "string"
+                }
+            }
+        },
+        "handlers.JoinRoomReq": {
+            "type": "object",
+            "required": [
+                "user_id"
+            ],
+            "properties": {
+                "user_id": {
+                    "type": "integer"
+                }
+            }
+        },
+        "handlers.ShareEventReq": {
+            "type": "object",
+            "required": [
+                "external_event_id",
+                "external_event_type",
+                "user_id"
+            ],
+            "properties": {
+                "external_event_id": {
+                    "type": "string"
+                },
+                "external_event_type": {
+                    "type": "string"
+                },
+                "user_id": {
+                    "type": "integer"
+                }
+            }
+        },
+        "models.Booking": {
             "type": "object",
             "properties": {
                 "booked_for_id": {
@@ -658,7 +924,7 @@ const docTemplate = `{
                 }
             }
         },
-        "district-friends_internal_models.ChatRoom": {
+        "models.ChatRoom": {
             "type": "object",
             "properties": {
                 "created_at": {
@@ -675,7 +941,7 @@ const docTemplate = `{
                 }
             }
         },
-        "district-friends_internal_models.ChatRoomMember": {
+        "models.ChatRoomMember": {
             "type": "object",
             "properties": {
                 "id": {
@@ -692,7 +958,7 @@ const docTemplate = `{
                 }
             }
         },
-        "district-friends_internal_models.ExternalEvent": {
+        "models.ExternalEvent": {
             "type": "object",
             "properties": {
                 "date": {
@@ -729,7 +995,7 @@ const docTemplate = `{
                 }
             }
         },
-        "district-friends_internal_models.Friendship": {
+        "models.Friendship": {
             "type": "object",
             "properties": {
                 "created_at": {
@@ -742,7 +1008,7 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "status": {
-                    "$ref": "#/definitions/district-friends_internal_models.FriendshipStatus"
+                    "$ref": "#/definitions/models.FriendshipStatus"
                 },
                 "updated_at": {
                     "type": "string"
@@ -752,7 +1018,7 @@ const docTemplate = `{
                 }
             }
         },
-        "district-friends_internal_models.FriendshipStatus": {
+        "models.FriendshipStatus": {
             "type": "string",
             "enum": [
                 "pending",
@@ -765,7 +1031,7 @@ const docTemplate = `{
                 "StatusDeclined"
             ]
         },
-        "district-friends_internal_models.Message": {
+        "models.Message": {
             "type": "object",
             "properties": {
                 "content": {
@@ -793,7 +1059,7 @@ const docTemplate = `{
                 }
             }
         },
-        "district-friends_internal_models.User": {
+        "models.User": {
             "type": "object",
             "properties": {
                 "created_at": {
@@ -805,112 +1071,17 @@ const docTemplate = `{
                 "id": {
                     "type": "integer"
                 },
+                "mobile_number": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
                 "updated_at": {
                     "type": "string"
                 },
                 "username": {
                     "type": "string"
-                }
-            }
-        },
-        "internal_api_handlers.CreateBookingReq": {
-            "type": "object",
-            "required": [
-                "external_event_id",
-                "external_event_type",
-                "quantity",
-                "user_id"
-            ],
-            "properties": {
-                "booked_for_id": {
-                    "description": "Optional",
-                    "type": "integer"
-                },
-                "external_event_id": {
-                    "type": "string"
-                },
-                "external_event_type": {
-                    "type": "string"
-                },
-                "quantity": {
-                    "type": "integer"
-                },
-                "total_price": {
-                    "type": "number"
-                },
-                "user_id": {
-                    "type": "integer"
-                }
-            }
-        },
-        "internal_api_handlers.CreateRoomReq": {
-            "type": "object",
-            "required": [
-                "name"
-            ],
-            "properties": {
-                "name": {
-                    "type": "string"
-                }
-            }
-        },
-        "internal_api_handlers.CreateUserRequest": {
-            "type": "object",
-            "required": [
-                "email",
-                "username"
-            ],
-            "properties": {
-                "email": {
-                    "type": "string"
-                },
-                "username": {
-                    "type": "string"
-                }
-            }
-        },
-        "internal_api_handlers.FriendRequestReq": {
-            "type": "object",
-            "required": [
-                "friend_id",
-                "user_id"
-            ],
-            "properties": {
-                "friend_id": {
-                    "type": "integer"
-                },
-                "user_id": {
-                    "type": "integer"
-                }
-            }
-        },
-        "internal_api_handlers.JoinRoomReq": {
-            "type": "object",
-            "required": [
-                "user_id"
-            ],
-            "properties": {
-                "user_id": {
-                    "type": "integer"
-                }
-            }
-        },
-        "internal_api_handlers.ShareEventReq": {
-            "type": "object",
-            "required": [
-                "external_event_id",
-                "external_event_type",
-                "user_id"
-            ],
-            "properties": {
-                "external_event_id": {
-                    "type": "string"
-                },
-                "external_event_type": {
-                    "type": "string"
-                },
-                "user_id": {
-                    "type": "integer"
                 }
             }
         }
@@ -919,12 +1090,12 @@ const docTemplate = `{
 
 // SwaggerInfo holds exported Swagger Info so clients can modify it
 var SwaggerInfo = &swag.Spec{
-	Version:          "1.0",
-	Host:             "localhost:8080",
-	BasePath:         "/",
+	Version:          "",
+	Host:             "",
+	BasePath:         "",
 	Schemes:          []string{},
-	Title:            "Friends District API",
-	Description:      "This is a friends feature extension backend.",
+	Title:            "",
+	Description:      "",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,
 	LeftDelim:        "{{",

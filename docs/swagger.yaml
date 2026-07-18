@@ -1,6 +1,108 @@
-basePath: /
 definitions:
-  district-friends_internal_models.Booking:
+  handlers.CreateBookingReq:
+    properties:
+      booked_for_id:
+        description: Optional
+        type: integer
+      external_event_id:
+        type: string
+      external_event_type:
+        type: string
+      quantity:
+        type: integer
+      total_price:
+        type: number
+      user_id:
+        type: integer
+    required:
+    - external_event_id
+    - external_event_type
+    - quantity
+    - user_id
+    type: object
+  handlers.CreateProfileRequest:
+    properties:
+      email:
+        type: string
+      mobile_number:
+        type: string
+      name:
+        type: string
+      username:
+        description: Optional for profile creation
+        type: string
+    required:
+    - email
+    - mobile_number
+    - name
+    type: object
+  handlers.CreateRoomReq:
+    properties:
+      name:
+        type: string
+    required:
+    - name
+    type: object
+  handlers.CreateUserRequest:
+    properties:
+      email:
+        type: string
+      username:
+        type: string
+    required:
+    - email
+    - username
+    type: object
+  handlers.FriendRequestReq:
+    properties:
+      friend_phone:
+        type: string
+      user_phone:
+        type: string
+    required:
+    - friend_phone
+    - user_phone
+    type: object
+  handlers.FriendResponse:
+    properties:
+      created_at:
+        type: string
+      email:
+        type: string
+      id:
+        type: integer
+      mobile_number:
+        type: string
+      name:
+        type: string
+      status:
+        type: string
+      updated_at:
+        type: string
+      username:
+        type: string
+    type: object
+  handlers.JoinRoomReq:
+    properties:
+      user_id:
+        type: integer
+    required:
+    - user_id
+    type: object
+  handlers.ShareEventReq:
+    properties:
+      external_event_id:
+        type: string
+      external_event_type:
+        type: string
+      user_id:
+        type: integer
+    required:
+    - external_event_id
+    - external_event_type
+    - user_id
+    type: object
+  models.Booking:
     properties:
       booked_for_id:
         description: ID of the friend this ticket was bought for (optional)
@@ -23,7 +125,7 @@ definitions:
       user_id:
         type: integer
     type: object
-  district-friends_internal_models.ChatRoom:
+  models.ChatRoom:
     properties:
       created_at:
         type: string
@@ -34,7 +136,7 @@ definitions:
       updated_at:
         type: string
     type: object
-  district-friends_internal_models.ChatRoomMember:
+  models.ChatRoomMember:
     properties:
       id:
         type: integer
@@ -45,7 +147,7 @@ definitions:
       user_id:
         type: integer
     type: object
-  district-friends_internal_models.ExternalEvent:
+  models.ExternalEvent:
     properties:
       date:
         description: String format for simplicity
@@ -70,7 +172,7 @@ definitions:
       url:
         type: string
     type: object
-  district-friends_internal_models.Friendship:
+  models.Friendship:
     properties:
       created_at:
         type: string
@@ -79,13 +181,13 @@ definitions:
       id:
         type: integer
       status:
-        $ref: '#/definitions/district-friends_internal_models.FriendshipStatus'
+        $ref: '#/definitions/models.FriendshipStatus'
       updated_at:
         type: string
       user_id:
         type: integer
     type: object
-  district-friends_internal_models.FriendshipStatus:
+  models.FriendshipStatus:
     enum:
     - pending
     - accepted
@@ -95,7 +197,7 @@ definitions:
     - StatusPending
     - StatusAccepted
     - StatusDeclined
-  district-friends_internal_models.Message:
+  models.Message:
     properties:
       content:
         type: string
@@ -114,7 +216,7 @@ definitions:
       sender_id:
         type: integer
     type: object
-  district-friends_internal_models.User:
+  models.User:
     properties:
       created_at:
         type: string
@@ -122,85 +224,17 @@ definitions:
         type: string
       id:
         type: integer
+      mobile_number:
+        type: string
+      name:
+        type: string
       updated_at:
         type: string
       username:
         type: string
     type: object
-  internal_api_handlers.CreateBookingReq:
-    properties:
-      booked_for_id:
-        description: Optional
-        type: integer
-      external_event_id:
-        type: string
-      external_event_type:
-        type: string
-      quantity:
-        type: integer
-      total_price:
-        type: number
-      user_id:
-        type: integer
-    required:
-    - external_event_id
-    - external_event_type
-    - quantity
-    - user_id
-    type: object
-  internal_api_handlers.CreateRoomReq:
-    properties:
-      name:
-        type: string
-    required:
-    - name
-    type: object
-  internal_api_handlers.CreateUserRequest:
-    properties:
-      email:
-        type: string
-      username:
-        type: string
-    required:
-    - email
-    - username
-    type: object
-  internal_api_handlers.FriendRequestReq:
-    properties:
-      friend_id:
-        type: integer
-      user_id:
-        type: integer
-    required:
-    - friend_id
-    - user_id
-    type: object
-  internal_api_handlers.JoinRoomReq:
-    properties:
-      user_id:
-        type: integer
-    required:
-    - user_id
-    type: object
-  internal_api_handlers.ShareEventReq:
-    properties:
-      external_event_id:
-        type: string
-      external_event_type:
-        type: string
-      user_id:
-        type: integer
-    required:
-    - external_event_id
-    - external_event_type
-    - user_id
-    type: object
-host: localhost:8080
 info:
   contact: {}
-  description: This is a friends feature extension backend.
-  title: Friends District API
-  version: "1.0"
 paths:
   /api/v1/bookings:
     get:
@@ -219,7 +253,7 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/district-friends_internal_models.Booking'
+              $ref: '#/definitions/models.Booking'
             type: array
         "400":
           description: Bad Request
@@ -244,14 +278,14 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/internal_api_handlers.CreateBookingReq'
+          $ref: '#/definitions/handlers.CreateBookingReq'
       produces:
       - application/json
       responses:
         "201":
           description: Created
           schema:
-            $ref: '#/definitions/district-friends_internal_models.Booking'
+            $ref: '#/definitions/models.Booking'
         "400":
           description: Bad Request
           schema:
@@ -285,7 +319,7 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/district-friends_internal_models.ExternalEvent'
+              $ref: '#/definitions/models.ExternalEvent'
             type: array
         "500":
           description: Internal Server Error
@@ -310,7 +344,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/district-friends_internal_models.ExternalEvent'
+            $ref: '#/definitions/models.ExternalEvent'
         "400":
           description: Bad Request
           schema:
@@ -326,13 +360,13 @@ paths:
       - events
   /api/v1/friends:
     get:
-      description: Retrieve a list of accepted friends for a user
+      description: Retrieve a list of accepted friends for a user by mobile number
       parameters:
-      - description: User ID
+      - description: User Mobile Number
         in: query
-        name: user_id
+        name: user_phone
         required: true
-        type: integer
+        type: string
       produces:
       - application/json
       responses:
@@ -340,10 +374,15 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/district-friends_internal_models.User'
+              $ref: '#/definitions/handlers.FriendResponse'
             type: array
         "400":
           description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
           schema:
             additionalProperties: true
             type: object
@@ -359,21 +398,21 @@ paths:
     post:
       consumes:
       - application/json
-      description: Accept a pending friend request
+      description: Accept a pending friend request using mobile numbers
       parameters:
       - description: Friend Request Info
         in: body
         name: request
         required: true
         schema:
-          $ref: '#/definitions/internal_api_handlers.FriendRequestReq'
+          $ref: '#/definitions/handlers.FriendRequestReq'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/district-friends_internal_models.Friendship'
+            $ref: '#/definitions/models.Friendship'
         "400":
           description: Bad Request
           schema:
@@ -396,23 +435,28 @@ paths:
     post:
       consumes:
       - application/json
-      description: Send a friend request to another user
+      description: Send a friend request to another user using mobile numbers
       parameters:
       - description: Friend Request Info
         in: body
         name: request
         required: true
         schema:
-          $ref: '#/definitions/internal_api_handlers.FriendRequestReq'
+          $ref: '#/definitions/handlers.FriendRequestReq'
       produces:
       - application/json
       responses:
         "201":
           description: Created
           schema:
-            $ref: '#/definitions/district-friends_internal_models.Friendship'
+            $ref: '#/definitions/models.Friendship'
         "400":
           description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
           schema:
             additionalProperties: true
             type: object
@@ -424,6 +468,74 @@ paths:
       summary: Send a friend request
       tags:
       - friends
+  /api/v1/friends/status:
+    get:
+      description: Get the current friendship status between two users via mobile
+        numbers
+      parameters:
+      - description: User Mobile Number
+        in: query
+        name: user_phone
+        required: true
+        type: string
+      - description: Friend Mobile Number
+        in: query
+        name: friend_phone
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Get friend status
+      tags:
+      - friends
+  /api/v1/profile:
+    post:
+      consumes:
+      - application/json
+      description: Register a new profile with name, email, and mobile number
+      parameters:
+      - description: Profile Info
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.CreateProfileRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.User'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Create a user profile
+      tags:
+      - users
   /api/v1/rooms:
     post:
       consumes:
@@ -435,14 +547,14 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/internal_api_handlers.CreateRoomReq'
+          $ref: '#/definitions/handlers.CreateRoomReq'
       produces:
       - application/json
       responses:
         "201":
           description: Created
           schema:
-            $ref: '#/definitions/district-friends_internal_models.ChatRoom'
+            $ref: '#/definitions/models.ChatRoom'
         "400":
           description: Bad Request
           schema:
@@ -472,14 +584,14 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/internal_api_handlers.JoinRoomReq'
+          $ref: '#/definitions/handlers.JoinRoomReq'
       produces:
       - application/json
       responses:
         "201":
           description: Created
           schema:
-            $ref: '#/definitions/district-friends_internal_models.ChatRoomMember'
+            $ref: '#/definitions/models.ChatRoomMember'
         "400":
           description: Bad Request
           schema:
@@ -509,7 +621,7 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/district-friends_internal_models.Message'
+              $ref: '#/definitions/models.Message'
             type: array
         "400":
           description: Bad Request
@@ -540,14 +652,14 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/internal_api_handlers.ShareEventReq'
+          $ref: '#/definitions/handlers.ShareEventReq'
       produces:
       - application/json
       responses:
         "201":
           description: Created
           schema:
-            $ref: '#/definitions/district-friends_internal_models.Message'
+            $ref: '#/definitions/models.Message'
         "400":
           description: Bad Request
           schema:
@@ -590,14 +702,14 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/internal_api_handlers.CreateUserRequest'
+          $ref: '#/definitions/handlers.CreateUserRequest'
       produces:
       - application/json
       responses:
         "201":
           description: Created
           schema:
-            $ref: '#/definitions/district-friends_internal_models.User'
+            $ref: '#/definitions/models.User'
         "400":
           description: Bad Request
           schema:
