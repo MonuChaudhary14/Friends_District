@@ -147,6 +147,63 @@ func (h *FriendHandler) AcceptFriendRequest(c *gin.Context) {
 	c.JSON(http.StatusOK, friendship)
 }
 
+// @Summary Reject a friend request
+// @Description Reject a pending friend request using mobile numbers
+// @Tags friends
+// @Accept json
+// @Produce json
+// @Param request body FriendRequestReq true "Friend Request Info"
+// @Success 200 {object} models.Friendship
+// @Failure 400 {object} map[string]interface{}
+// @Failure 404 {object} map[string]interface{}
+// @Failure 500 {object} map[string]interface{}
+// @Router /api/v1/friends/reject [post]
+func (h *FriendHandler) RejectFriendRequest(c *gin.Context) {
+	var req FriendRequestReq
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	normUserPhone, err := utils.ValidateAndNormalizePhone(req.UserPhone)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid user_phone: " + err.Error()})
+		return
+	}
+	req.UserPhone = normUserPhone
+
+	normFriendPhone, err := utils.ValidateAndNormalizePhone(req.FriendPhone)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid friend_phone: " + err.Error()})
+		return
+	}
+	req.FriendPhone = normFriendPhone
+
+	var user, friend models.User
+	if err := h.DB.Where("mobile_number = ?", req.UserPhone).First(&user).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Sender not found"})
+		return
+	}
+	if err := h.DB.Where("mobile_number = ?", req.FriendPhone).First(&friend).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Recipient not found"})
+		return
+	}
+
+	var friendship models.Friendship
+	if err := h.DB.Where("user_id = ? AND friend_id = ? AND status = ?", user.ID, friend.ID, models.StatusPending).First(&friendship).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Friend request not found or not pending"})
+		return
+	}
+
+	friendship.Status = models.StatusDeclined
+	if err := h.DB.Save(&friendship).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to reject friend request"})
+		return
+	}
+
+	c.JSON(http.StatusOK, friendship)
+}
+
 type FriendResponse struct {
 	models.User
 	Status string `json:"status"`

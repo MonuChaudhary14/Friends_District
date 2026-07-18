@@ -1,3 +1,4 @@
+basePath: /
 definitions:
   handlers.CreateBookingReq:
     properties:
@@ -223,8 +224,12 @@ definitions:
       username:
         type: string
     type: object
+host: localhost:8080
 info:
   contact: {}
+  description: This is a friends feature extension backend.
+  title: Friends District API
+  version: "1.0"
 paths:
   /api/v1/bookings:
     get:
@@ -440,6 +445,43 @@ paths:
             additionalProperties: true
             type: object
       summary: Accept a friend request
+      tags:
+      - friends
+  /api/v1/friends/reject:
+    post:
+      consumes:
+      - application/json
+      description: Reject a pending friend request using mobile numbers
+      parameters:
+      - description: Friend Request Info
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.FriendRequestReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Friendship'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Reject a friend request
       tags:
       - friends
   /api/v1/friends/request:

@@ -43,6 +43,7 @@ func SetupRouter(db *gorm.DB) *gin.Engine {
 	{
 		friends.POST("/request", friendHandler.SendFriendRequest)
 		friends.POST("/accept", friendHandler.AcceptFriendRequest)
+		friends.POST("/reject", friendHandler.RejectFriendRequest)
 		friends.GET("", friendHandler.ListFriends)
 		friends.GET("/status", friendHandler.GetFriendStatus)
 	}
