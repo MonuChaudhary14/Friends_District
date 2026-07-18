@@ -1,7 +1,11 @@
 package handlers
 
 import (
+	"fmt"
+	"math/rand"
 	"net/http"
+	"strings"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
@@ -78,7 +82,11 @@ func (h *UserHandler) CreateProfile(c *gin.Context) {
 
 	username := req.Username
 	if username == "" {
-		username = req.MobileNumber // fallback username
+		firstName := strings.Split(strings.TrimSpace(req.Name), " ")[0]
+		firstName = strings.ToLower(firstName)
+		rand.Seed(time.Now().UnixNano())
+		randomNumber := rand.Intn(9000) + 1000 // 4 digit random number
+		username = fmt.Sprintf("%s%d", firstName, randomNumber)
 	}
 
 	user := models.User{
