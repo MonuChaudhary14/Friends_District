@@ -8,18 +8,19 @@ import (
 
 	_ "district-friends/docs"
 	"district-friends/internal/api/handlers"
+	"district-friends/internal/ws"
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
 )
 
-func SetupRouter(db *gorm.DB) *gin.Engine {
+func SetupRouter(db *gorm.DB, hub *ws.Hub) *gin.Engine {
 	r := gin.Default()
 
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
 	userHandler := handlers.NewUserHandler(db)
 	friendHandler := handlers.NewFriendHandler(db)
-	chatHandler := handlers.NewChatHandler(db)
+	chatHandler := handlers.NewChatHandler(db, hub)
 	eventHandler := handlers.NewEventHandler()
 	bookingHandler := handlers.NewBookingHandler(db)
 

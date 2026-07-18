@@ -12,16 +12,19 @@ import (
 
 	"district-friends/internal/models"
 	"district-friends/internal/utils"
+	"district-friends/internal/ws"
 )
 
 type ChatHandler struct {
 	DB       *gorm.DB
 	Upgrader websocket.Upgrader
+	Hub      *ws.Hub
 }
 
-func NewChatHandler(db *gorm.DB) *ChatHandler {
+func NewChatHandler(db *gorm.DB, hub *ws.Hub) *ChatHandler {
 	return &ChatHandler{
-		DB: db,
+		DB:  db,
+		Hub: hub,
 		Upgrader: websocket.Upgrader{
 			CheckOrigin: func(r *http.Request) bool { return true },
 		},
@@ -290,33 +293,14 @@ func (h *ChatHandler) ServeWS(c *gin.Context) {
 		log.Println("Failed to set websocket upgrade:", err)
 		return
 	}
-	defer conn.Close()
 
-	for {
-		_, msgData, err := conn.ReadMessage()
-		if err != nil {
-			log.Println("Read error:", err)
-			break
-		}
+	client := ws.NewClient(h.Hub, user, uint(roomID), conn, h.DB)
+	client.Hub.Register <- client
 
-		msg := models.Message{
-			RoomID:    uint(roomID),
-			SenderID:  user.ID,
-			Content:   string(msgData),
-			CreatedAt: time.Now(),
-		}
-
-		if err := h.DB.Create(&msg).Error; err != nil {
-			log.Println("Database error:", err)
-			continue
-		}
-
-		// Simple echo to the current user. In a real app we'd broadcast to a Hub.
-		if err := conn.WriteMessage(websocket.TextMessage, []byte(msg.Content)); err != nil {
-			log.Println("Write error:", err)
-			break
-		}
-	}
+	// Allow collection of memory referenced by the caller by doing all work in
+	// new goroutines.
+	go client.WritePump()
+	go client.ReadPump()
 }
 
 type ShareEventReq struct {

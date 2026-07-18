@@ -8,6 +8,7 @@ import (
 
 	"district-friends/internal/api"
 	"district-friends/internal/db"
+	"district-friends/internal/ws"
 )
 
 // @title Friends District API
@@ -22,7 +23,10 @@ func main() {
 
 	dbConn := db.InitDB()
 
-	r := api.SetupRouter(dbConn)
+	hub := ws.NewHub()
+	go hub.Run()
+
+	r := api.SetupRouter(dbConn, hub)
 
 	port := os.Getenv("PORT")
 	if port == "" {
