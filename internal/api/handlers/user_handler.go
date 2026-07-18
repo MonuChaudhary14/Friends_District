@@ -11,6 +11,7 @@ import (
 	"gorm.io/gorm"
 
 	"district-friends/internal/models"
+	"district-friends/internal/utils"
 )
 
 type UserHandler struct {
@@ -44,6 +45,13 @@ func (h *UserHandler) CreateProfile(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
+
+	normPhone, err := utils.ValidateAndNormalizePhone(req.MobileNumber)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	req.MobileNumber = normPhone
 
 	username := req.Username
 	if username == "" {
@@ -86,8 +94,14 @@ func (h *UserHandler) GetProfile(c *gin.Context) {
 		return
 	}
 
+	normPhone, err := utils.ValidateAndNormalizePhone(mobileNumber)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
 	var user models.User
-	if err := h.DB.Where("mobile_number = ?", mobileNumber).First(&user).Error; err != nil {
+	if err := h.DB.Where("mobile_number = ?", normPhone).First(&user).Error; err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Profile not found"})
 		return
 	}

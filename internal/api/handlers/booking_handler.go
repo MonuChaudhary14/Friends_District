@@ -8,6 +8,7 @@ import (
 	"gorm.io/gorm"
 
 	"district-friends/internal/models"
+	"district-friends/internal/utils"
 )
 
 type BookingHandler struct {
@@ -45,6 +46,13 @@ func (h *BookingHandler) CreateBooking(c *gin.Context) {
 		return
 	}
 
+	normUserPhone, err := utils.ValidateAndNormalizePhone(req.UserPhone)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid user_phone: " + err.Error()})
+		return
+	}
+	req.UserPhone = normUserPhone
+
 	var user models.User
 	if err := h.DB.Where("mobile_number = ?", req.UserPhone).First(&user).Error; err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
@@ -54,6 +62,13 @@ func (h *BookingHandler) CreateBooking(c *gin.Context) {
 	var bookedForID *uint
 	// If booking for someone else, verify friendship
 	if req.BookedForPhone != nil {
+		normFriendPhone, err := utils.ValidateAndNormalizePhone(*req.BookedForPhone)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid booked_for_phone: " + err.Error()})
+			return
+		}
+		*req.BookedForPhone = normFriendPhone
+
 		var friend models.User
 		if err := h.DB.Where("mobile_number = ?", *req.BookedForPhone).First(&friend).Error; err != nil {
 			c.JSON(http.StatusNotFound, gin.H{"error": "Booked for user not found"})
@@ -61,7 +76,7 @@ func (h *BookingHandler) CreateBooking(c *gin.Context) {
 		}
 		bookedForID = &friend.ID
 		var friendship models.Friendship
-		err := h.DB.Where(
+		err = h.DB.Where(
 			"((user_id = ? AND friend_id = ?) OR (user_id = ? AND friend_id = ?)) AND status = ?",
 			user.ID, *bookedForID, *bookedForID, user.ID, models.StatusAccepted,
 		).First(&friendship).Error
@@ -107,8 +122,14 @@ func (h *BookingHandler) ListBookings(c *gin.Context) {
 		return
 	}
 
+	normUserPhone, err := utils.ValidateAndNormalizePhone(userPhone)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid user_phone: " + err.Error()})
+		return
+	}
+
 	var user models.User
-	if err := h.DB.Where("mobile_number = ?", userPhone).First(&user).Error; err != nil {
+	if err := h.DB.Where("mobile_number = ?", normUserPhone).First(&user).Error; err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
 		return
 	}

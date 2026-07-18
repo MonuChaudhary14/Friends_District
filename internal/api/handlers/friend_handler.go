@@ -7,6 +7,7 @@ import (
 	"gorm.io/gorm"
 
 	"district-friends/internal/models"
+	"district-friends/internal/utils"
 )
 
 type FriendHandler struct {
@@ -39,6 +40,20 @@ func (h *FriendHandler) SendFriendRequest(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
+
+	normUserPhone, err := utils.ValidateAndNormalizePhone(req.UserPhone)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid user_phone: " + err.Error()})
+		return
+	}
+	req.UserPhone = normUserPhone
+
+	normFriendPhone, err := utils.ValidateAndNormalizePhone(req.FriendPhone)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid friend_phone: " + err.Error()})
+		return
+	}
+	req.FriendPhone = normFriendPhone
 
 	if req.UserPhone == req.FriendPhone {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Cannot send friend request to yourself"})
@@ -93,6 +108,20 @@ func (h *FriendHandler) AcceptFriendRequest(c *gin.Context) {
 		return
 	}
 
+	normUserPhone, err := utils.ValidateAndNormalizePhone(req.UserPhone)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid user_phone: " + err.Error()})
+		return
+	}
+	req.UserPhone = normUserPhone
+
+	normFriendPhone, err := utils.ValidateAndNormalizePhone(req.FriendPhone)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid friend_phone: " + err.Error()})
+		return
+	}
+	req.FriendPhone = normFriendPhone
+
 	var user, friend models.User
 	if err := h.DB.Where("mobile_number = ?", req.UserPhone).First(&user).Error; err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Sender not found"})
@@ -140,8 +169,14 @@ func (h *FriendHandler) ListFriends(c *gin.Context) {
 		return
 	}
 
+	normUserPhone, err := utils.ValidateAndNormalizePhone(userPhone)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid user_phone: " + err.Error()})
+		return
+	}
+
 	var user models.User
-	if err := h.DB.Where("mobile_number = ?", userPhone).First(&user).Error; err != nil {
+	if err := h.DB.Where("mobile_number = ?", normUserPhone).First(&user).Error; err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
 		return
 	}
@@ -182,12 +217,24 @@ func (h *FriendHandler) GetFriendStatus(c *gin.Context) {
 		return
 	}
 
+	normUserPhone, err := utils.ValidateAndNormalizePhone(userPhone)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid user_phone: " + err.Error()})
+		return
+	}
+
+	normFriendPhone, err := utils.ValidateAndNormalizePhone(friendPhone)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid friend_phone: " + err.Error()})
+		return
+	}
+
 	var user, friend models.User
-	if err := h.DB.Where("mobile_number = ?", userPhone).First(&user).Error; err != nil {
+	if err := h.DB.Where("mobile_number = ?", normUserPhone).First(&user).Error; err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
 		return
 	}
-	if err := h.DB.Where("mobile_number = ?", friendPhone).First(&friend).Error; err != nil {
+	if err := h.DB.Where("mobile_number = ?", normFriendPhone).First(&friend).Error; err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Friend not found"})
 		return
 	}
