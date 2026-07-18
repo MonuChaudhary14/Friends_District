@@ -76,6 +76,25 @@ func (h *FriendHandler) SendFriendRequest(c *gin.Context) {
 		return
 	}
 
+	// Check if the other user already sent a request to this user
+	var reciprocal models.Friendship
+	if err := h.DB.Where("user_id = ? AND friend_id = ? AND status = ?", friend.ID, user.ID, models.StatusPending).First(&reciprocal).Error; err == nil {
+		// Auto-accept the reciprocal request
+		reciprocal.Status = models.StatusAccepted
+		h.DB.Save(&reciprocal)
+		
+		// Create the new friendship as accepted
+		friendship = models.Friendship{
+			UserID:   user.ID,
+			FriendID: friend.ID,
+			Status:   models.StatusAccepted,
+		}
+		h.DB.Create(&friendship)
+		
+		c.JSON(http.StatusCreated, friendship)
+		return
+	}
+
 	friendship = models.Friendship{
 		UserID:   user.ID,
 		FriendID: friend.ID,
@@ -133,7 +152,8 @@ func (h *FriendHandler) AcceptFriendRequest(c *gin.Context) {
 	}
 
 	var friendship models.Friendship
-	if err := h.DB.Where("user_id = ? AND friend_id = ? AND status = ?", user.ID, friend.ID, models.StatusPending).First(&friendship).Error; err != nil {
+	// Find the request that was sent BY friend TO user
+	if err := h.DB.Where("user_id = ? AND friend_id = ? AND status = ?", friend.ID, user.ID, models.StatusPending).First(&friendship).Error; err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Friend request not found or not pending"})
 		return
 	}
@@ -142,6 +162,20 @@ func (h *FriendHandler) AcceptFriendRequest(c *gin.Context) {
 	if err := h.DB.Save(&friendship).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to accept friend request"})
 		return
+	}
+
+	// Create or update the reciprocal record so friendship is bidirectional
+	var reciprocal models.Friendship
+	if err := h.DB.Where("user_id = ? AND friend_id = ?", user.ID, friend.ID).First(&reciprocal).Error; err != nil {
+		reciprocal = models.Friendship{
+			UserID:   user.ID,
+			FriendID: friend.ID,
+			Status:   models.StatusAccepted,
+		}
+		h.DB.Create(&reciprocal)
+	} else {
+		reciprocal.Status = models.StatusAccepted
+		h.DB.Save(&reciprocal)
 	}
 
 	c.JSON(http.StatusOK, friendship)
@@ -190,18 +224,22 @@ func (h *FriendHandler) RejectFriendRequest(c *gin.Context) {
 	}
 
 	var friendship models.Friendship
-	if err := h.DB.Where("user_id = ? AND friend_id = ? AND status = ?", user.ID, friend.ID, models.StatusPending).First(&friendship).Error; err != nil {
+	// Find the request that was sent BY friend TO user
+	if err := h.DB.Where("user_id = ? AND friend_id = ? AND status = ?", friend.ID, user.ID, models.StatusPending).First(&friendship).Error; err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Friend request not found or not pending"})
 		return
 	}
 
-	friendship.Status = models.StatusDeclined
-	if err := h.DB.Save(&friendship).Error; err != nil {
+	// Delete it instead of declining so they can send another one later if they want
+	if err := h.DB.Delete(&friendship).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to reject friend request"})
 		return
 	}
 
-	c.JSON(http.StatusOK, friendship)
+	// Delete any pending reciprocal request just in case they both sent one
+	h.DB.Where("user_id = ? AND friend_id = ? AND status = ?", user.ID, friend.ID, models.StatusPending).Delete(&models.Friendship{})
+
+	c.JSON(http.StatusOK, gin.H{"message": "Friend request rejected and deleted"})
 }
 
 // @Summary List sent friend requests
