@@ -78,30 +78,24 @@ func (h *UserHandler) CreateProfile(c *gin.Context) {
 }
 
 // @Summary Get a user profile
-// @Description Retrieve a user's profile using their mobile number
+// @Description Retrieve a user's profile using their username
 // @Tags users
 // @Produce json
-// @Param mobile_number query string true "Mobile Number"
+// @Param username query string true "Username"
 // @Success 200 {object} models.User
 // @Failure 400 {object} map[string]interface{}
 // @Failure 404 {object} map[string]interface{}
 // @Failure 500 {object} map[string]interface{}
 // @Router /api/v1/profile [get]
 func (h *UserHandler) GetProfile(c *gin.Context) {
-	mobileNumber := c.Query("mobile_number")
-	if mobileNumber == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "mobile_number is required"})
-		return
-	}
-
-	normPhone, err := utils.ValidateAndNormalizePhone(mobileNumber)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+	username := c.Query("username")
+	if username == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "username is required"})
 		return
 	}
 
 	var user models.User
-	if err := h.DB.Where("mobile_number = ?", normPhone).First(&user).Error; err != nil {
+	if err := h.DB.Where("username = ?", username).First(&user).Error; err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Profile not found"})
 		return
 	}

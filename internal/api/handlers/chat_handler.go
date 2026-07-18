@@ -11,7 +11,6 @@ import (
 	"gorm.io/gorm"
 
 	"district-friends/internal/models"
-	"district-friends/internal/utils"
 	"district-friends/internal/ws"
 )
 
@@ -32,8 +31,8 @@ func NewChatHandler(db *gorm.DB, hub *ws.Hub) *ChatHandler {
 }
 
 type CreateRoomReq struct {
-	Name      string `json:"name" binding:"required"`
-	UserPhone string `json:"user_phone" binding:"required"`
+	Name     string `json:"name" binding:"required"`
+	Username string `json:"username" binding:"required"`
 }
 
 // @Summary Create a chat room
@@ -54,14 +53,8 @@ func (h *ChatHandler) CreateRoom(c *gin.Context) {
 		return
 	}
 
-	normPhone, err := utils.ValidateAndNormalizePhone(req.UserPhone)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid user_phone: " + err.Error()})
-		return
-	}
-
 	var user models.User
-	if err := h.DB.Where("mobile_number = ?", normPhone).First(&user).Error; err != nil {
+	if err := h.DB.Where("username = ?", req.Username).First(&user).Error; err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
 		return
 	}
@@ -90,7 +83,7 @@ func (h *ChatHandler) CreateRoom(c *gin.Context) {
 }
 
 type JoinRoomReq struct {
-	UserPhone string `json:"user_phone" binding:"required"`
+	Username string `json:"username" binding:"required"`
 }
 
 // @Summary Join a chat room
@@ -118,15 +111,8 @@ func (h *ChatHandler) JoinRoom(c *gin.Context) {
 		return
 	}
 
-	normPhone, err := utils.ValidateAndNormalizePhone(req.UserPhone)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid user_phone: " + err.Error()})
-		return
-	}
-	req.UserPhone = normPhone
-
 	var user models.User
-	if err := h.DB.Where("mobile_number = ?", req.UserPhone).First(&user).Error; err != nil {
+	if err := h.DB.Where("username = ?", req.Username).First(&user).Error; err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
 		return
 	}
@@ -146,8 +132,8 @@ func (h *ChatHandler) JoinRoom(c *gin.Context) {
 }
 
 type InviteRoomReq struct {
-	InviterPhone string `json:"inviter_phone" binding:"required"`
-	InviteePhone string `json:"invitee_phone" binding:"required"`
+	InviterUsername string `json:"inviter_username" binding:"required"`
+	InviteeUsername string `json:"invitee_username" binding:"required"`
 }
 
 // @Summary Invite a user to a chat room
@@ -178,25 +164,14 @@ func (h *ChatHandler) InviteToRoom(c *gin.Context) {
 	}
 
 	// Normalize phones
-	normInviter, err := utils.ValidateAndNormalizePhone(req.InviterPhone)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid inviter_phone: " + err.Error()})
-		return
-	}
-
-	normInvitee, err := utils.ValidateAndNormalizePhone(req.InviteePhone)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid invitee_phone: " + err.Error()})
-		return
-	}
 
 	// Find both users
 	var inviter, invitee models.User
-	if err := h.DB.Where("mobile_number = ?", normInviter).First(&inviter).Error; err != nil {
+	if err := h.DB.Where("username = ?", req.InviterUsername).First(&inviter).Error; err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Inviter not found"})
 		return
 	}
-	if err := h.DB.Where("mobile_number = ?", normInvitee).First(&invitee).Error; err != nil {
+	if err := h.DB.Where("username = ?", req.InviteeUsername).First(&invitee).Error; err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Invitee not found"})
 		return
 	}
@@ -260,7 +235,7 @@ func (h *ChatHandler) GetMessages(c *gin.Context) {
 // @Description Connect to real-time chat via WebSocket
 // @Tags chat
 // @Param id path int true "Room ID"
-// @Param user_phone query string true "User Phone"
+// @Param username query string true "User Phone"
 // @Router /api/v1/rooms/{id}/ws [get]
 func (h *ChatHandler) ServeWS(c *gin.Context) {
 	roomIDStr := c.Param("id")
@@ -270,20 +245,14 @@ func (h *ChatHandler) ServeWS(c *gin.Context) {
 		return
 	}
 
-	userPhone := c.Query("user_phone")
-	if userPhone == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "user_phone is required"})
-		return
-	}
-
-	normPhone, err := utils.ValidateAndNormalizePhone(userPhone)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid user_phone: " + err.Error()})
+	username := c.Query("username")
+	if username == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "username is required"})
 		return
 	}
 
 	var user models.User
-	if err := h.DB.Where("mobile_number = ?", normPhone).First(&user).Error; err != nil {
+	if err := h.DB.Where("username = ?", username).First(&user).Error; err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
 		return
 	}
@@ -304,7 +273,7 @@ func (h *ChatHandler) ServeWS(c *gin.Context) {
 }
 
 type ShareEventReq struct {
-	UserPhone             string `json:"user_phone" binding:"required"`
+	Username              string `json:"username" binding:"required"`
 	ExternalEventID       string `json:"external_event_id" binding:"required"`
 	ExternalEventType     string `json:"external_event_type" binding:"required"`
 	ExternalEventName     string `json:"external_event_name" binding:"required"`
@@ -336,15 +305,8 @@ func (h *ChatHandler) ShareEvent(c *gin.Context) {
 		return
 	}
 
-	normPhone, err := utils.ValidateAndNormalizePhone(req.UserPhone)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid user_phone: " + err.Error()})
-		return
-	}
-	req.UserPhone = normPhone
-
 	var user models.User
-	if err := h.DB.Where("mobile_number = ?", req.UserPhone).First(&user).Error; err != nil {
+	if err := h.DB.Where("username = ?", req.Username).First(&user).Error; err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
 		return
 	}
@@ -382,27 +344,21 @@ func (h *ChatHandler) ShareEvent(c *gin.Context) {
 // @Description Get a list of chat rooms that the user is a member of
 // @Tags chat
 // @Produce json
-// @Param user_phone query string true "User Phone"
+// @Param username query string true "User Phone"
 // @Success 200 {array} models.ChatRoom
 // @Failure 400 {object} map[string]interface{}
 // @Failure 404 {object} map[string]interface{}
 // @Failure 500 {object} map[string]interface{}
 // @Router /api/v1/rooms [get]
 func (h *ChatHandler) ListJoinedRooms(c *gin.Context) {
-	userPhone := c.Query("user_phone")
-	if userPhone == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "user_phone is required"})
-		return
-	}
-
-	normPhone, err := utils.ValidateAndNormalizePhone(userPhone)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid user_phone: " + err.Error()})
+	username := c.Query("username")
+	if username == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "username is required"})
 		return
 	}
 
 	var user models.User
-	if err := h.DB.Where("mobile_number = ?", normPhone).First(&user).Error; err != nil {
+	if err := h.DB.Where("username = ?", username).First(&user).Error; err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
 		return
 	}
@@ -422,7 +378,7 @@ func (h *ChatHandler) ListJoinedRooms(c *gin.Context) {
 }
 
 type HandleRoomInviteReq struct {
-	UserPhone string `json:"user_phone" binding:"required"`
+	Username string `json:"username" binding:"required"`
 }
 
 // @Summary Accept a room invite
@@ -451,14 +407,8 @@ func (h *ChatHandler) AcceptRoomInvite(c *gin.Context) {
 		return
 	}
 
-	normPhone, err := utils.ValidateAndNormalizePhone(req.UserPhone)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid user_phone"})
-		return
-	}
-
 	var user models.User
-	if err := h.DB.Where("mobile_number = ?", normPhone).First(&user).Error; err != nil {
+	if err := h.DB.Where("username = ?", req.Username).First(&user).Error; err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
 		return
 	}
@@ -506,14 +456,8 @@ func (h *ChatHandler) RejectRoomInvite(c *gin.Context) {
 		return
 	}
 
-	normPhone, err := utils.ValidateAndNormalizePhone(req.UserPhone)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid user_phone"})
-		return
-	}
-
 	var user models.User
-	if err := h.DB.Where("mobile_number = ?", normPhone).First(&user).Error; err != nil {
+	if err := h.DB.Where("username = ?", req.Username).First(&user).Error; err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
 		return
 	}
@@ -536,27 +480,21 @@ func (h *ChatHandler) RejectRoomInvite(c *gin.Context) {
 // @Description Get a list of chat rooms that the user has been invited to but hasn't joined
 // @Tags chat
 // @Produce json
-// @Param user_phone query string true "User Phone"
+// @Param username query string true "User Phone"
 // @Success 200 {array} models.ChatRoom
 // @Failure 400 {object} map[string]interface{}
 // @Failure 404 {object} map[string]interface{}
 // @Failure 500 {object} map[string]interface{}
 // @Router /api/v1/rooms/invites [get]
 func (h *ChatHandler) ListRoomInvites(c *gin.Context) {
-	userPhone := c.Query("user_phone")
-	if userPhone == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "user_phone is required"})
-		return
-	}
-
-	normPhone, err := utils.ValidateAndNormalizePhone(userPhone)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid user_phone"})
+	username := c.Query("username")
+	if username == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "username is required"})
 		return
 	}
 
 	var user models.User
-	if err := h.DB.Where("mobile_number = ?", normPhone).First(&user).Error; err != nil {
+	if err := h.DB.Where("username = ?", username).First(&user).Error; err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
 		return
 	}
@@ -604,8 +542,8 @@ func (h *ChatHandler) ListRoomMembers(c *gin.Context) {
 }
 
 type VoteMessageReq struct {
-	UserPhone string `json:"user_phone" binding:"required"`
-	Vote      string `json:"vote" binding:"required"` // "interested", "maybe", "not_interested"
+	Username string `json:"username" binding:"required"`
+	Vote     string `json:"vote" binding:"required"` // "interested", "maybe", "not_interested"
 }
 
 // @Summary Vote on a shared event message
@@ -639,14 +577,8 @@ func (h *ChatHandler) VoteMessage(c *gin.Context) {
 		return
 	}
 
-	normPhone, err := utils.ValidateAndNormalizePhone(req.UserPhone)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid user_phone"})
-		return
-	}
-
 	var user models.User
-	if err := h.DB.Where("mobile_number = ?", normPhone).First(&user).Error; err != nil {
+	if err := h.DB.Where("username = ?", req.Username).First(&user).Error; err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
 		return
 	}
