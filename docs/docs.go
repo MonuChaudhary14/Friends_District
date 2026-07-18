@@ -152,6 +152,36 @@ const docTemplate = `{
                 }
             }
         },
+        "/api/v1/events/spotlight": {
+            "get": {
+                "description": "Get a curated list of top trending events (one movie, one concert, one dining)",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "events"
+                ],
+                "summary": "Get Spotlight Events",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/models.ExternalEvent"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
         "/api/v1/events/{id}": {
             "get": {
                 "description": "Get details for a specific event",

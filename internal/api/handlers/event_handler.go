@@ -79,3 +79,31 @@ func (h *EventHandler) GetEvent(c *gin.Context) {
 	
 	c.JSON(http.StatusNotImplemented, gin.H{"error": "Single event lookup is not fully implemented for merged external APIs. Use the list endpoint."})
 }
+
+// @Summary Get Spotlight Events
+// @Description Get a curated list of top trending events (one movie, one concert, one dining)
+// @Tags events
+// @Produce json
+// @Success 200 {array} models.ExternalEvent
+// @Failure 500 {object} map[string]interface{}
+// @Router /api/v1/events/spotlight [get]
+func (h *EventHandler) GetSpotlight(c *gin.Context) {
+	var spotlights []models.ExternalEvent
+
+	movies, err := h.TMDB.FetchMovies()
+	if err == nil && len(movies) > 0 {
+		spotlights = append(spotlights, movies[0])
+	}
+
+	concerts, err := h.Ticketmaster.FetchConcerts()
+	if err == nil && len(concerts) > 0 {
+		spotlights = append(spotlights, concerts[0])
+	}
+
+	dining, err := h.Foursquare.FetchDining()
+	if err == nil && len(dining) > 0 {
+		spotlights = append(spotlights, dining[0])
+	}
+
+	c.JSON(http.StatusOK, spotlights)
+}

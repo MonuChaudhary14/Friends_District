@@ -58,6 +58,7 @@ func SetupRouter(db *gorm.DB) *gin.Engine {
 
 		events := v1.Group("/events")
 		{
+			events.GET("/spotlight", eventHandler.GetSpotlight)
 			events.GET("", eventHandler.ListEvents)
 			events.GET("/:id", eventHandler.GetEvent)
 		}

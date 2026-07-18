@@ -348,6 +348,27 @@ paths:
       summary: Get Event Details
       tags:
       - events
+  /api/v1/events/spotlight:
+    get:
+      description: Get a curated list of top trending events (one movie, one concert,
+        one dining)
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.ExternalEvent'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Get Spotlight Events
+      tags:
+      - events
   /api/v1/friends:
     get:
       description: Retrieve a list of accepted friends for a user by mobile number
