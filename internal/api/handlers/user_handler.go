@@ -68,3 +68,29 @@ func (h *UserHandler) CreateProfile(c *gin.Context) {
 
 	c.JSON(http.StatusCreated, user)
 }
+
+// @Summary Get a user profile
+// @Description Retrieve a user's profile using their mobile number
+// @Tags users
+// @Produce json
+// @Param mobile_number query string true "Mobile Number"
+// @Success 200 {object} models.User
+// @Failure 400 {object} map[string]interface{}
+// @Failure 404 {object} map[string]interface{}
+// @Failure 500 {object} map[string]interface{}
+// @Router /api/v1/profile [get]
+func (h *UserHandler) GetProfile(c *gin.Context) {
+	mobileNumber := c.Query("mobile_number")
+	if mobileNumber == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "mobile_number is required"})
+		return
+	}
+
+	var user models.User
+	if err := h.DB.Where("mobile_number = ?", mobileNumber).First(&user).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Profile not found"})
+		return
+	}
+
+	c.JSON(http.StatusOK, user)
+}

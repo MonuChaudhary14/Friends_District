@@ -516,6 +516,39 @@ paths:
       tags:
       - friends
   /api/v1/profile:
+    get:
+      description: Retrieve a user's profile using their mobile number
+      parameters:
+      - description: Mobile Number
+        in: query
+        name: mobile_number
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.User'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Get a user profile
+      tags:
+      - users
     post:
       consumes:
       - application/json

@@ -35,6 +35,7 @@ func SetupRouter(db *gorm.DB) *gin.Engine {
 	profile := v1.Group("/profile")
 	{
 		profile.POST("", userHandler.CreateProfile)
+		profile.GET("", userHandler.GetProfile)
 	}
 
 	// Friend Routes
