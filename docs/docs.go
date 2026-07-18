@@ -749,7 +749,7 @@ const docTemplate = `{
                 }
             },
             "post": {
-                "description": "Create a new chat room",
+                "description": "Create a new chat room and automatically join as a member",
                 "consumes": [
                     "application/json"
                 ],
@@ -762,7 +762,7 @@ const docTemplate = `{
                 "summary": "Create a chat room",
                 "parameters": [
                     {
-                        "description": "Room Name",
+                        "description": "Room Name and User Phone",
                         "name": "request",
                         "in": "body",
                         "required": true,
@@ -780,6 +780,13 @@ const docTemplate = `{
                     },
                     "400": {
                         "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
                         "schema": {
                             "type": "object",
                             "additionalProperties": true
@@ -1282,10 +1289,14 @@ const docTemplate = `{
         "handlers.CreateRoomReq": {
             "type": "object",
             "required": [
-                "name"
+                "name",
+                "user_phone"
             ],
             "properties": {
                 "name": {
+                    "type": "string"
+                },
+                "user_phone": {
                     "type": "string"
                 }
             }

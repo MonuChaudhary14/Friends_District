@@ -41,8 +41,11 @@ definitions:
     properties:
       name:
         type: string
+      user_phone:
+        type: string
     required:
     - name
+    - user_phone
     type: object
   handlers.FriendRequestReq:
     properties:
@@ -753,9 +756,9 @@ paths:
     post:
       consumes:
       - application/json
-      description: Create a new chat room
+      description: Create a new chat room and automatically join as a member
       parameters:
-      - description: Room Name
+      - description: Room Name and User Phone
         in: body
         name: request
         required: true
@@ -770,6 +773,11 @@ paths:
             $ref: '#/definitions/models.ChatRoom'
         "400":
           description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
           schema:
             additionalProperties: true
             type: object

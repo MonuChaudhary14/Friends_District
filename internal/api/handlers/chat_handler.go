@@ -29,17 +29,19 @@ func NewChatHandler(db *gorm.DB) *ChatHandler {
 }
 
 type CreateRoomReq struct {
-	Name string `json:"name" binding:"required"`
+	Name      string `json:"name" binding:"required"`
+	UserPhone string `json:"user_phone" binding:"required"`
 }
 
 // @Summary Create a chat room
-// @Description Create a new chat room
+// @Description Create a new chat room and automatically join as a member
 // @Tags chat
 // @Accept json
 // @Produce json
-// @Param request body CreateRoomReq true "Room Name"
+// @Param request body CreateRoomReq true "Room Name and User Phone"
 // @Success 201 {object} models.ChatRoom
 // @Failure 400 {object} map[string]interface{}
+// @Failure 404 {object} map[string]interface{}
 // @Failure 500 {object} map[string]interface{}
 // @Router /api/v1/rooms [post]
 func (h *ChatHandler) CreateRoom(c *gin.Context) {
@@ -49,9 +51,35 @@ func (h *ChatHandler) CreateRoom(c *gin.Context) {
 		return
 	}
 
+	normPhone, err := utils.ValidateAndNormalizePhone(req.UserPhone)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid user_phone: " + err.Error()})
+		return
+	}
+
+	var user models.User
+	if err := h.DB.Where("mobile_number = ?", normPhone).First(&user).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
+		return
+	}
+
+	// Create the room
 	room := models.ChatRoom{Name: req.Name}
 	if err := h.DB.Create(&room).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create room"})
+		return
+	}
+
+	// Automatically add the creator as a member
+	member := models.ChatRoomMember{
+		RoomID:   room.ID,
+		UserID:   user.ID,
+		Status:   "joined",
+		JoinedAt: time.Now(),
+	}
+	if err := h.DB.Create(&member).Error; err != nil {
+		// Even if member creation fails, the room is created, but we should log it
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Room created but failed to join"})
 		return
 	}
 
