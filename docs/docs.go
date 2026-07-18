@@ -39,7 +39,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/district-friends_internal_models.Event"
+                                "$ref": "#/definitions/district-friends_internal_models.ExternalEvent"
                             }
                         }
                     },
@@ -76,7 +76,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/district-friends_internal_models.Event"
+                            "$ref": "#/definitions/district-friends_internal_models.ExternalEvent"
                         }
                     },
                     "400": {
@@ -396,7 +396,7 @@ const docTemplate = `{
         },
         "/api/v1/rooms/{id}/share": {
             "post": {
-                "description": "Share a specific event to a chat room",
+                "description": "Share a specific TMDB or Ticketmaster event to a chat room",
                 "consumes": [
                     "application/json"
                 ],
@@ -406,7 +406,7 @@ const docTemplate = `{
                 "tags": [
                     "chat"
                 ],
-                "summary": "Share an event in a chat room",
+                "summary": "Share an external event in a chat room",
                 "parameters": [
                     {
                         "type": "integer",
@@ -416,7 +416,7 @@ const docTemplate = `{
                         "required": true
                     },
                     {
-                        "description": "User ID and Event ID",
+                        "description": "User ID and External Event Details",
                         "name": "request",
                         "in": "body",
                         "required": true,
@@ -434,13 +434,6 @@ const docTemplate = `{
                     },
                     "400": {
                         "description": "Bad Request",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found",
                         "schema": {
                             "type": "object",
                             "additionalProperties": true
@@ -566,20 +559,18 @@ const docTemplate = `{
                 }
             }
         },
-        "district-friends_internal_models.Event": {
+        "district-friends_internal_models.ExternalEvent": {
             "type": "object",
             "properties": {
-                "created_at": {
-                    "type": "string"
-                },
                 "date": {
+                    "description": "String format for simplicity",
                     "type": "string"
                 },
                 "description": {
                     "type": "string"
                 },
                 "id": {
-                    "type": "integer"
+                    "type": "string"
                 },
                 "image_url": {
                     "type": "string"
@@ -587,17 +578,20 @@ const docTemplate = `{
                 "location": {
                     "type": "string"
                 },
-                "price": {
+                "price_max": {
+                    "type": "number"
+                },
+                "price_min": {
                     "type": "number"
                 },
                 "title": {
                     "type": "string"
                 },
                 "type": {
-                    "description": "e.g., Movie, Concert, Dining, Laughter Show",
+                    "description": "\"movie\" or \"concert\"",
                     "type": "string"
                 },
-                "updated_at": {
+                "url": {
                     "type": "string"
                 }
             }
@@ -647,9 +641,13 @@ const docTemplate = `{
                 "created_at": {
                     "type": "string"
                 },
-                "event_id": {
-                    "description": "If set, this message shares an event",
-                    "type": "integer"
+                "external_event_id": {
+                    "description": "String ID from external API (TMDB/Ticketmaster)",
+                    "type": "string"
+                },
+                "external_event_type": {
+                    "description": "\"movie\" or \"concert\"",
+                    "type": "string"
                 },
                 "id": {
                     "type": "integer"
@@ -737,12 +735,16 @@ const docTemplate = `{
         "internal_api_handlers.ShareEventReq": {
             "type": "object",
             "required": [
-                "event_id",
+                "external_event_id",
+                "external_event_type",
                 "user_id"
             ],
             "properties": {
-                "event_id": {
-                    "type": "integer"
+                "external_event_id": {
+                    "type": "string"
+                },
+                "external_event_type": {
+                    "type": "string"
                 },
                 "user_id": {
                     "type": "integer"

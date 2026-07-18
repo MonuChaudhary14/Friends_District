@@ -182,20 +182,20 @@ func (h *ChatHandler) ServeWS(c *gin.Context) {
 }
 
 type ShareEventReq struct {
-	UserID  uint `json:"user_id" binding:"required"`
-	EventID uint `json:"event_id" binding:"required"`
+	UserID            uint   `json:"user_id" binding:"required"`
+	ExternalEventID   string `json:"external_event_id" binding:"required"`
+	ExternalEventType string `json:"external_event_type" binding:"required"`
 }
 
-// @Summary Share an event in a chat room
-// @Description Share a specific event to a chat room
+// @Summary Share an external event in a chat room
+// @Description Share a specific TMDB or Ticketmaster event to a chat room
 // @Tags chat
 // @Accept json
 // @Produce json
 // @Param id path int true "Room ID"
-// @Param request body ShareEventReq true "User ID and Event ID"
+// @Param request body ShareEventReq true "User ID and External Event Details"
 // @Success 201 {object} models.Message
 // @Failure 400 {object} map[string]interface{}
-// @Failure 404 {object} map[string]interface{}
 // @Failure 500 {object} map[string]interface{}
 // @Router /api/v1/rooms/{id}/share [post]
 func (h *ChatHandler) ShareEvent(c *gin.Context) {
@@ -212,28 +212,19 @@ func (h *ChatHandler) ShareEvent(c *gin.Context) {
 		return
 	}
 
-	// Verify event exists
-	var event models.Event
-	if err := h.DB.First(&event, req.EventID).Error; err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "Event not found"})
-		return
-	}
-
 	msg := models.Message{
-		RoomID:    uint(roomID),
-		SenderID:  req.UserID,
-		EventID:   &req.EventID,
-		Content:   "Check out this event: " + event.Title,
-		CreatedAt: time.Now(),
+		RoomID:            uint(roomID),
+		SenderID:          req.UserID,
+		ExternalEventID:   req.ExternalEventID,
+		ExternalEventType: req.ExternalEventType,
+		Content:           "Check out this " + req.ExternalEventType + " event!",
+		CreatedAt:         time.Now(),
 	}
 
 	if err := h.DB.Create(&msg).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to share event"})
 		return
 	}
-
-	// Populate the event relation so it's returned in the response
-	h.DB.Preload("Event").First(&msg, msg.ID)
 
 	c.JSON(http.StatusCreated, msg)
 }

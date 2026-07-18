@@ -2,20 +2,23 @@ package handlers
 
 import (
 	"net/http"
-	"strconv"
 
 	"github.com/gin-gonic/gin"
-	"gorm.io/gorm"
 
 	"district-friends/internal/models"
+	"district-friends/internal/services"
 )
 
 type EventHandler struct {
-	DB *gorm.DB
+	TMDB         *services.TMDBService
+	Ticketmaster *services.TicketmasterService
 }
 
-func NewEventHandler(db *gorm.DB) *EventHandler {
-	return &EventHandler{DB: db}
+func NewEventHandler() *EventHandler {
+	return &EventHandler{
+		TMDB:         services.NewTMDBService(),
+		Ticketmaster: services.NewTicketmasterService(),
+	}
 }
 
 // @Summary List Events
@@ -23,24 +26,31 @@ func NewEventHandler(db *gorm.DB) *EventHandler {
 // @Tags events
 // @Produce json
 // @Param type query string false "Filter by event type (e.g. Movie, Concert)"
-// @Success 200 {array} models.Event
+// @Success 200 {array} models.ExternalEvent
 // @Failure 500 {object} map[string]interface{}
 // @Router /api/v1/events [get]
 func (h *EventHandler) ListEvents(c *gin.Context) {
-	var events []models.Event
-	query := h.DB
+	var allEvents []models.ExternalEvent
 
 	eventType := c.Query("type")
-	if eventType != "" {
-		query = query.Where("type = ?", eventType)
+
+	// Fetch Movies
+	if eventType == "" || eventType == "movie" {
+		movies, err := h.TMDB.FetchMovies()
+		if err == nil {
+			allEvents = append(allEvents, movies...)
+		}
 	}
 
-	if err := query.Find(&events).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch events"})
-		return
+	// Fetch Concerts
+	if eventType == "" || eventType == "concert" {
+		concerts, err := h.Ticketmaster.FetchConcerts()
+		if err == nil {
+			allEvents = append(allEvents, concerts...)
+		}
 	}
 
-	c.JSON(http.StatusOK, events)
+	c.JSON(http.StatusOK, allEvents)
 }
 
 // @Summary Get Event Details
@@ -48,23 +58,14 @@ func (h *EventHandler) ListEvents(c *gin.Context) {
 // @Tags events
 // @Produce json
 // @Param id path int true "Event ID"
-// @Success 200 {object} models.Event
+// @Success 200 {object} models.ExternalEvent
 // @Failure 400 {object} map[string]interface{}
 // @Failure 404 {object} map[string]interface{}
 // @Router /api/v1/events/{id} [get]
 func (h *EventHandler) GetEvent(c *gin.Context) {
-	idStr := c.Param("id")
-	id, err := strconv.Atoi(idStr)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid event ID"})
-		return
-	}
-
-	var event models.Event
-	if err := h.DB.First(&event, id).Error; err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "Event not found"})
-		return
-	}
-
-	c.JSON(http.StatusOK, event)
+	// For this prototype, since we merge data, fetching a single event by ID across 2 different APIs 
+	// would require knowing which API the ID belongs to. The frontend usually passes the type, or we search both.
+	// We'll leave a simple stub here that tells the client to use the list endpoint, or we can implement a search.
+	
+	c.JSON(http.StatusNotImplemented, gin.H{"error": "Single event lookup is not fully implemented for merged external APIs. Use the list endpoint."})
 }

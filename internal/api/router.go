@@ -20,7 +20,7 @@ func SetupRouter(db *gorm.DB) *gin.Engine {
 	userHandler := handlers.NewUserHandler(db)
 	friendHandler := handlers.NewFriendHandler(db)
 	chatHandler := handlers.NewChatHandler(db)
-	eventHandler := handlers.NewEventHandler(db)
+	eventHandler := handlers.NewEventHandler()
 
 	r.GET("/health", func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{

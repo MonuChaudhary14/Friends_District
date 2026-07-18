@@ -22,28 +22,29 @@ definitions:
       user_id:
         type: integer
     type: object
-  district-friends_internal_models.Event:
+  district-friends_internal_models.ExternalEvent:
     properties:
-      created_at:
-        type: string
       date:
+        description: String format for simplicity
         type: string
       description:
         type: string
       id:
-        type: integer
+        type: string
       image_url:
         type: string
       location:
         type: string
-      price:
+      price_max:
+        type: number
+      price_min:
         type: number
       title:
         type: string
       type:
-        description: e.g., Movie, Concert, Dining, Laughter Show
+        description: '"movie" or "concert"'
         type: string
-      updated_at:
+      url:
         type: string
     type: object
   district-friends_internal_models.Friendship:
@@ -77,9 +78,12 @@ definitions:
         type: string
       created_at:
         type: string
-      event_id:
-        description: If set, this message shares an event
-        type: integer
+      external_event_id:
+        description: String ID from external API (TMDB/Ticketmaster)
+        type: string
+      external_event_type:
+        description: '"movie" or "concert"'
+        type: string
       id:
         type: integer
       room_id:
@@ -136,12 +140,15 @@ definitions:
     type: object
   internal_api_handlers.ShareEventReq:
     properties:
-      event_id:
-        type: integer
+      external_event_id:
+        type: string
+      external_event_type:
+        type: string
       user_id:
         type: integer
     required:
-    - event_id
+    - external_event_id
+    - external_event_type
     - user_id
     type: object
 host: localhost:8080
@@ -166,7 +173,7 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/district-friends_internal_models.Event'
+              $ref: '#/definitions/district-friends_internal_models.ExternalEvent'
             type: array
         "500":
           description: Internal Server Error
@@ -191,7 +198,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/district-friends_internal_models.Event'
+            $ref: '#/definitions/district-friends_internal_models.ExternalEvent'
         "400":
           description: Bad Request
           schema:
@@ -409,14 +416,14 @@ paths:
     post:
       consumes:
       - application/json
-      description: Share a specific event to a chat room
+      description: Share a specific TMDB or Ticketmaster event to a chat room
       parameters:
       - description: Room ID
         in: path
         name: id
         required: true
         type: integer
-      - description: User ID and Event ID
+      - description: User ID and External Event Details
         in: body
         name: request
         required: true
@@ -434,17 +441,12 @@ paths:
           schema:
             additionalProperties: true
             type: object
-        "404":
-          description: Not Found
-          schema:
-            additionalProperties: true
-            type: object
         "500":
           description: Internal Server Error
           schema:
             additionalProperties: true
             type: object
-      summary: Share an event in a chat room
+      summary: Share an external event in a chat room
       tags:
       - chat
   /api/v1/rooms/{id}/ws:

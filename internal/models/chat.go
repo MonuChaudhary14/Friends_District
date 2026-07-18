@@ -28,11 +28,11 @@ type Message struct {
 	ID        uint      `gorm:"primarykey" json:"id"`
 	RoomID    uint      `gorm:"not null;index" json:"room_id"`
 	SenderID  uint      `gorm:"not null;index" json:"sender_id"`
-	Content   string    `gorm:"type:text;not null" json:"content"`
-	EventID   *uint     `json:"event_id,omitempty"` // If set, this message shares an event
-	CreatedAt time.Time `json:"created_at"`
+	Content           string    `gorm:"type:text;not null" json:"content"`
+	ExternalEventID   string    `json:"external_event_id,omitempty"` // String ID from external API (TMDB/Ticketmaster)
+	ExternalEventType string    `json:"external_event_type,omitempty"` // "movie" or "concert"
+	CreatedAt         time.Time `json:"created_at"`
 
 	Room   ChatRoom `gorm:"foreignKey:RoomID" json:"-"`
 	Sender User     `gorm:"foreignKey:SenderID" json:"-"`
-	Event  *Event   `gorm:"foreignKey:EventID" json:"-"`
 }
