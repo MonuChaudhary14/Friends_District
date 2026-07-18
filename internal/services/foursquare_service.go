@@ -79,7 +79,7 @@ func (s *FoursquareService) FetchDining() ([]models.ExternalEvent, error) {
 			Title:       venue.Name,
 			Description: desc,
 			Type:        "Dining",
-			Date:        time.Now().AddDate(0, 0, 2), // Mocking a future date for dining events
+			Date:        time.Now().AddDate(0, 0, 2).Format("2006-01-02"), // Mocking a future date for dining events
 			Location:    venue.Location.FormattedAddress,
 			ImageURL:    "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&q=80&w=800", // Generic restaurant image
 		})
