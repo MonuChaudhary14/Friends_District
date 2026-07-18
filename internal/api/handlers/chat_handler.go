@@ -361,6 +361,16 @@ func (h *ChatHandler) ShareEvent(c *gin.Context) {
 		return
 	}
 
+	// Attach sender for JSON broadcast
+	msg.Sender = user
+
+	// Broadcast the shared event message to the room via WebSocket Hub
+	broadcastMsg := ws.BroadcastMessage{
+		RoomID:  uint(roomID),
+		Message: msg,
+	}
+	h.Hub.Broadcast <- broadcastMsg
+
 	c.JSON(http.StatusCreated, msg)
 }
 
