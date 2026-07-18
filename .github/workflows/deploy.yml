@@ -70,23 +70,23 @@ jobs:
 
       - name: Test SSH connection
         run: |
-          ssh -o StrictHostKeyChecking=yes \
+          ssh -o StrictHostKeyChecking=yes -o ServerAliveInterval=60 \
               ubuntu@${{ secrets.EC2_HOST }} \
               "echo SSH connection OK"
 
       - name: Prepare directories on EC2
         run: |
-          ssh ubuntu@${{ secrets.EC2_HOST }} \
+          ssh -o ServerAliveInterval=60 ubuntu@${{ secrets.EC2_HOST }} \
           "mkdir -p /home/ubuntu/district-friends"
 
       - name: Copy deploy bundle to EC2
         run: |
-          scp district-friends-bundle.tar.gz \
+          scp -o ServerAliveInterval=60 district-friends-bundle.tar.gz \
           ubuntu@${{ secrets.EC2_HOST }}:/home/ubuntu/district-friends/district-friends-bundle.tar.gz
 
       - name: Deploy with Docker Compose
         run: |
-          ssh ubuntu@${{ secrets.EC2_HOST }} << 'EOF'
+          ssh -o ServerAliveInterval=60 ubuntu@${{ secrets.EC2_HOST }} << 'EOF'
             set -e
             cd /home/ubuntu/district-friends
             tar -xzf district-friends-bundle.tar.gz
