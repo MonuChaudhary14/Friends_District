@@ -347,9 +347,9 @@ func (h *FriendHandler) GetFriendStatus(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "username is required"})
 		return
 	}
-	friendUsername := c.Query("friend_phone")
+	friendUsername := c.Query("friend_username")
 	if friendUsername == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "friend_phone is required"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "friend_username is required"})
 		return
 	}
 
