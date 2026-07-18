@@ -576,3 +576,31 @@ func (h *ChatHandler) ListRoomInvites(c *gin.Context) {
 
 	c.JSON(http.StatusOK, rooms)
 }
+
+// @Summary List Room Members
+// @Description Get all members in a specific chat room
+// @Tags chat
+// @Produce json
+// @Param id path int true "Room ID"
+// @Success 200 {array} models.User
+// @Router /api/v1/rooms/{id}/members [get]
+func (h *ChatHandler) ListRoomMembers(c *gin.Context) {
+	roomID := c.Param("id")
+
+	var members []models.ChatRoomMember
+	if err := h.DB.Preload("User").Where("room_id = ?", roomID).Find(&members).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch room members"})
+		return
+	}
+
+	var users []models.User
+	for _, m := range members {
+		users = append(users, m.User)
+	}
+
+	if users == nil {
+		users = []models.User{}
+	}
+
+	c.JSON(http.StatusOK, users)
+}

@@ -40,7 +40,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/models.Booking"
+                                "$ref": "#/definitions/district-friends_internal_models.Booking"
                             }
                         }
                     },
@@ -79,7 +79,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/handlers.CreateBookingReq"
+                            "$ref": "#/definitions/internal_api_handlers.CreateBookingReq"
                         }
                     }
                 ],
@@ -87,7 +87,7 @@ const docTemplate = `{
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/models.Booking"
+                            "$ref": "#/definitions/district-friends_internal_models.Booking"
                         }
                     },
                     "400": {
@@ -138,7 +138,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/models.ExternalEvent"
+                                "$ref": "#/definitions/district-friends_internal_models.ExternalEvent"
                             }
                         }
                     },
@@ -168,7 +168,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/models.ExternalEvent"
+                                "$ref": "#/definitions/district-friends_internal_models.ExternalEvent"
                             }
                         }
                     },
@@ -205,7 +205,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/models.ExternalEvent"
+                            "$ref": "#/definitions/district-friends_internal_models.ExternalEvent"
                         }
                     },
                     "400": {
@@ -250,7 +250,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/handlers.FriendResponse"
+                                "$ref": "#/definitions/internal_api_handlers.FriendResponse"
                             }
                         }
                     },
@@ -298,7 +298,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/handlers.FriendRequestReq"
+                            "$ref": "#/definitions/internal_api_handlers.FriendRequestReq"
                         }
                     }
                 ],
@@ -306,7 +306,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/models.Friendship"
+                            "$ref": "#/definitions/district-friends_internal_models.Friendship"
                         }
                     },
                     "400": {
@@ -353,7 +353,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/handlers.FriendRequestReq"
+                            "$ref": "#/definitions/internal_api_handlers.FriendRequestReq"
                         }
                     }
                 ],
@@ -361,7 +361,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/models.Friendship"
+                            "$ref": "#/definitions/district-friends_internal_models.Friendship"
                         }
                     },
                     "400": {
@@ -408,7 +408,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/handlers.FriendRequestReq"
+                            "$ref": "#/definitions/internal_api_handlers.FriendRequestReq"
                         }
                     }
                 ],
@@ -416,7 +416,7 @@ const docTemplate = `{
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/models.Friendship"
+                            "$ref": "#/definitions/district-friends_internal_models.Friendship"
                         }
                     },
                     "400": {
@@ -468,7 +468,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/handlers.FriendResponse"
+                                "$ref": "#/definitions/internal_api_handlers.FriendResponse"
                             }
                         }
                     },
@@ -521,7 +521,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/handlers.FriendResponse"
+                                "$ref": "#/definitions/internal_api_handlers.FriendResponse"
                             }
                         }
                     },
@@ -623,7 +623,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/models.User"
+                            "$ref": "#/definitions/district-friends_internal_models.User"
                         }
                     },
                     "400": {
@@ -668,7 +668,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/handlers.CreateProfileRequest"
+                            "$ref": "#/definitions/internal_api_handlers.CreateProfileRequest"
                         }
                     }
                 ],
@@ -676,7 +676,7 @@ const docTemplate = `{
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/models.User"
+                            "$ref": "#/definitions/district-friends_internal_models.User"
                         }
                     },
                     "400": {
@@ -721,7 +721,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/models.ChatRoom"
+                                "$ref": "#/definitions/district-friends_internal_models.ChatRoom"
                             }
                         }
                     },
@@ -767,7 +767,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/handlers.CreateRoomReq"
+                            "$ref": "#/definitions/internal_api_handlers.CreateRoomReq"
                         }
                     }
                 ],
@@ -775,7 +775,7 @@ const docTemplate = `{
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/models.ChatRoom"
+                            "$ref": "#/definitions/district-friends_internal_models.ChatRoom"
                         }
                     },
                     "400": {
@@ -827,7 +827,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/models.ChatRoom"
+                                "$ref": "#/definitions/district-friends_internal_models.ChatRoom"
                             }
                         }
                     },
@@ -882,7 +882,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/handlers.HandleRoomInviteReq"
+                            "$ref": "#/definitions/internal_api_handlers.HandleRoomInviteReq"
                         }
                     }
                 ],
@@ -890,7 +890,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/models.ChatRoomMember"
+                            "$ref": "#/definitions/district-friends_internal_models.ChatRoomMember"
                         }
                     },
                     "400": {
@@ -944,7 +944,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/handlers.InviteRoomReq"
+                            "$ref": "#/definitions/internal_api_handlers.InviteRoomReq"
                         }
                     }
                 ],
@@ -952,7 +952,7 @@ const docTemplate = `{
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/models.ChatRoomMember"
+                            "$ref": "#/definitions/district-friends_internal_models.ChatRoomMember"
                         }
                     },
                     "400": {
@@ -1013,7 +1013,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/handlers.JoinRoomReq"
+                            "$ref": "#/definitions/internal_api_handlers.JoinRoomReq"
                         }
                     }
                 ],
@@ -1021,7 +1021,7 @@ const docTemplate = `{
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/models.ChatRoomMember"
+                            "$ref": "#/definitions/district-friends_internal_models.ChatRoomMember"
                         }
                     },
                     "400": {
@@ -1036,6 +1036,38 @@ const docTemplate = `{
                         "schema": {
                             "type": "object",
                             "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/rooms/{id}/members": {
+            "get": {
+                "description": "Get all members in a specific chat room",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "chat"
+                ],
+                "summary": "List Room Members",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Room ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/district-friends_internal_models.User"
+                            }
                         }
                     }
                 }
@@ -1066,7 +1098,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/models.Message"
+                                "$ref": "#/definitions/district-friends_internal_models.Message"
                             }
                         }
                     },
@@ -1114,7 +1146,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/handlers.HandleRoomInviteReq"
+                            "$ref": "#/definitions/internal_api_handlers.HandleRoomInviteReq"
                         }
                     }
                 ],
@@ -1177,7 +1209,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/handlers.ShareEventReq"
+                            "$ref": "#/definitions/internal_api_handlers.ShareEventReq"
                         }
                     }
                 ],
@@ -1185,7 +1217,7 @@ const docTemplate = `{
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/models.Message"
+                            "$ref": "#/definitions/district-friends_internal_models.Message"
                         }
                     },
                     "400": {
@@ -1233,175 +1265,7 @@ const docTemplate = `{
         }
     },
     "definitions": {
-        "handlers.CreateBookingReq": {
-            "type": "object",
-            "required": [
-                "external_event_id",
-                "external_event_type",
-                "quantity",
-                "user_phone"
-            ],
-            "properties": {
-                "booked_for_phone": {
-                    "description": "Optional",
-                    "type": "string"
-                },
-                "external_event_id": {
-                    "type": "string"
-                },
-                "external_event_type": {
-                    "type": "string"
-                },
-                "quantity": {
-                    "type": "integer"
-                },
-                "total_price": {
-                    "type": "number"
-                },
-                "user_phone": {
-                    "type": "string"
-                }
-            }
-        },
-        "handlers.CreateProfileRequest": {
-            "type": "object",
-            "required": [
-                "email",
-                "mobile_number",
-                "name"
-            ],
-            "properties": {
-                "email": {
-                    "type": "string"
-                },
-                "mobile_number": {
-                    "type": "string"
-                },
-                "name": {
-                    "type": "string"
-                },
-                "username": {
-                    "description": "Optional for profile creation",
-                    "type": "string"
-                }
-            }
-        },
-        "handlers.CreateRoomReq": {
-            "type": "object",
-            "required": [
-                "name",
-                "user_phone"
-            ],
-            "properties": {
-                "name": {
-                    "type": "string"
-                },
-                "user_phone": {
-                    "type": "string"
-                }
-            }
-        },
-        "handlers.FriendRequestReq": {
-            "type": "object",
-            "required": [
-                "friend_phone",
-                "user_phone"
-            ],
-            "properties": {
-                "friend_phone": {
-                    "type": "string"
-                },
-                "user_phone": {
-                    "type": "string"
-                }
-            }
-        },
-        "handlers.FriendResponse": {
-            "type": "object",
-            "properties": {
-                "created_at": {
-                    "type": "string"
-                },
-                "email": {
-                    "type": "string"
-                },
-                "id": {
-                    "type": "integer"
-                },
-                "mobile_number": {
-                    "type": "string"
-                },
-                "name": {
-                    "type": "string"
-                },
-                "status": {
-                    "type": "string"
-                },
-                "updated_at": {
-                    "type": "string"
-                },
-                "username": {
-                    "type": "string"
-                }
-            }
-        },
-        "handlers.HandleRoomInviteReq": {
-            "type": "object",
-            "required": [
-                "user_phone"
-            ],
-            "properties": {
-                "user_phone": {
-                    "type": "string"
-                }
-            }
-        },
-        "handlers.InviteRoomReq": {
-            "type": "object",
-            "required": [
-                "invitee_phone",
-                "inviter_phone"
-            ],
-            "properties": {
-                "invitee_phone": {
-                    "type": "string"
-                },
-                "inviter_phone": {
-                    "type": "string"
-                }
-            }
-        },
-        "handlers.JoinRoomReq": {
-            "type": "object",
-            "required": [
-                "user_phone"
-            ],
-            "properties": {
-                "user_phone": {
-                    "type": "string"
-                }
-            }
-        },
-        "handlers.ShareEventReq": {
-            "type": "object",
-            "required": [
-                "external_event_id",
-                "external_event_type",
-                "user_phone"
-            ],
-            "properties": {
-                "external_event_id": {
-                    "type": "string"
-                },
-                "external_event_type": {
-                    "type": "string"
-                },
-                "user_phone": {
-                    "type": "string"
-                }
-            }
-        },
-        "models.Booking": {
+        "district-friends_internal_models.Booking": {
             "type": "object",
             "properties": {
                 "booked_for_id": {
@@ -1435,7 +1299,7 @@ const docTemplate = `{
                 }
             }
         },
-        "models.ChatRoom": {
+        "district-friends_internal_models.ChatRoom": {
             "type": "object",
             "properties": {
                 "created_at": {
@@ -1452,7 +1316,7 @@ const docTemplate = `{
                 }
             }
         },
-        "models.ChatRoomMember": {
+        "district-friends_internal_models.ChatRoomMember": {
             "type": "object",
             "properties": {
                 "id": {
@@ -1473,7 +1337,7 @@ const docTemplate = `{
                 }
             }
         },
-        "models.ExternalEvent": {
+        "district-friends_internal_models.ExternalEvent": {
             "type": "object",
             "properties": {
                 "date": {
@@ -1510,7 +1374,7 @@ const docTemplate = `{
                 }
             }
         },
-        "models.Friendship": {
+        "district-friends_internal_models.Friendship": {
             "type": "object",
             "properties": {
                 "created_at": {
@@ -1523,7 +1387,7 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "status": {
-                    "$ref": "#/definitions/models.FriendshipStatus"
+                    "$ref": "#/definitions/district-friends_internal_models.FriendshipStatus"
                 },
                 "updated_at": {
                     "type": "string"
@@ -1533,7 +1397,7 @@ const docTemplate = `{
                 }
             }
         },
-        "models.FriendshipStatus": {
+        "district-friends_internal_models.FriendshipStatus": {
             "type": "string",
             "enum": [
                 "pending",
@@ -1546,7 +1410,7 @@ const docTemplate = `{
                 "StatusDeclined"
             ]
         },
-        "models.Message": {
+        "district-friends_internal_models.Message": {
             "type": "object",
             "properties": {
                 "content": {
@@ -1574,7 +1438,7 @@ const docTemplate = `{
                 }
             }
         },
-        "models.User": {
+        "district-friends_internal_models.User": {
             "type": "object",
             "properties": {
                 "created_at": {
@@ -1596,6 +1460,174 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "username": {
+                    "type": "string"
+                }
+            }
+        },
+        "internal_api_handlers.CreateBookingReq": {
+            "type": "object",
+            "required": [
+                "external_event_id",
+                "external_event_type",
+                "quantity",
+                "user_phone"
+            ],
+            "properties": {
+                "booked_for_phone": {
+                    "description": "Optional",
+                    "type": "string"
+                },
+                "external_event_id": {
+                    "type": "string"
+                },
+                "external_event_type": {
+                    "type": "string"
+                },
+                "quantity": {
+                    "type": "integer"
+                },
+                "total_price": {
+                    "type": "number"
+                },
+                "user_phone": {
+                    "type": "string"
+                }
+            }
+        },
+        "internal_api_handlers.CreateProfileRequest": {
+            "type": "object",
+            "required": [
+                "email",
+                "mobile_number",
+                "name"
+            ],
+            "properties": {
+                "email": {
+                    "type": "string"
+                },
+                "mobile_number": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "username": {
+                    "description": "Optional for profile creation",
+                    "type": "string"
+                }
+            }
+        },
+        "internal_api_handlers.CreateRoomReq": {
+            "type": "object",
+            "required": [
+                "name",
+                "user_phone"
+            ],
+            "properties": {
+                "name": {
+                    "type": "string"
+                },
+                "user_phone": {
+                    "type": "string"
+                }
+            }
+        },
+        "internal_api_handlers.FriendRequestReq": {
+            "type": "object",
+            "required": [
+                "friend_phone",
+                "user_phone"
+            ],
+            "properties": {
+                "friend_phone": {
+                    "type": "string"
+                },
+                "user_phone": {
+                    "type": "string"
+                }
+            }
+        },
+        "internal_api_handlers.FriendResponse": {
+            "type": "object",
+            "properties": {
+                "created_at": {
+                    "type": "string"
+                },
+                "email": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "mobile_number": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string"
+                },
+                "updated_at": {
+                    "type": "string"
+                },
+                "username": {
+                    "type": "string"
+                }
+            }
+        },
+        "internal_api_handlers.HandleRoomInviteReq": {
+            "type": "object",
+            "required": [
+                "user_phone"
+            ],
+            "properties": {
+                "user_phone": {
+                    "type": "string"
+                }
+            }
+        },
+        "internal_api_handlers.InviteRoomReq": {
+            "type": "object",
+            "required": [
+                "invitee_phone",
+                "inviter_phone"
+            ],
+            "properties": {
+                "invitee_phone": {
+                    "type": "string"
+                },
+                "inviter_phone": {
+                    "type": "string"
+                }
+            }
+        },
+        "internal_api_handlers.JoinRoomReq": {
+            "type": "object",
+            "required": [
+                "user_phone"
+            ],
+            "properties": {
+                "user_phone": {
+                    "type": "string"
+                }
+            }
+        },
+        "internal_api_handlers.ShareEventReq": {
+            "type": "object",
+            "required": [
+                "external_event_id",
+                "external_event_type",
+                "user_phone"
+            ],
+            "properties": {
+                "external_event_id": {
+                    "type": "string"
+                },
+                "external_event_type": {
+                    "type": "string"
+                },
+                "user_phone": {
                     "type": "string"
                 }
             }

@@ -1,119 +1,6 @@
 basePath: /
 definitions:
-  handlers.CreateBookingReq:
-    properties:
-      booked_for_phone:
-        description: Optional
-        type: string
-      external_event_id:
-        type: string
-      external_event_type:
-        type: string
-      quantity:
-        type: integer
-      total_price:
-        type: number
-      user_phone:
-        type: string
-    required:
-    - external_event_id
-    - external_event_type
-    - quantity
-    - user_phone
-    type: object
-  handlers.CreateProfileRequest:
-    properties:
-      email:
-        type: string
-      mobile_number:
-        type: string
-      name:
-        type: string
-      username:
-        description: Optional for profile creation
-        type: string
-    required:
-    - email
-    - mobile_number
-    - name
-    type: object
-  handlers.CreateRoomReq:
-    properties:
-      name:
-        type: string
-      user_phone:
-        type: string
-    required:
-    - name
-    - user_phone
-    type: object
-  handlers.FriendRequestReq:
-    properties:
-      friend_phone:
-        type: string
-      user_phone:
-        type: string
-    required:
-    - friend_phone
-    - user_phone
-    type: object
-  handlers.FriendResponse:
-    properties:
-      created_at:
-        type: string
-      email:
-        type: string
-      id:
-        type: integer
-      mobile_number:
-        type: string
-      name:
-        type: string
-      status:
-        type: string
-      updated_at:
-        type: string
-      username:
-        type: string
-    type: object
-  handlers.HandleRoomInviteReq:
-    properties:
-      user_phone:
-        type: string
-    required:
-    - user_phone
-    type: object
-  handlers.InviteRoomReq:
-    properties:
-      invitee_phone:
-        type: string
-      inviter_phone:
-        type: string
-    required:
-    - invitee_phone
-    - inviter_phone
-    type: object
-  handlers.JoinRoomReq:
-    properties:
-      user_phone:
-        type: string
-    required:
-    - user_phone
-    type: object
-  handlers.ShareEventReq:
-    properties:
-      external_event_id:
-        type: string
-      external_event_type:
-        type: string
-      user_phone:
-        type: string
-    required:
-    - external_event_id
-    - external_event_type
-    - user_phone
-    type: object
-  models.Booking:
+  district-friends_internal_models.Booking:
     properties:
       booked_for_id:
         description: ID of the friend this ticket was bought for (optional)
@@ -136,7 +23,7 @@ definitions:
       user_id:
         type: integer
     type: object
-  models.ChatRoom:
+  district-friends_internal_models.ChatRoom:
     properties:
       created_at:
         type: string
@@ -147,7 +34,7 @@ definitions:
       updated_at:
         type: string
     type: object
-  models.ChatRoomMember:
+  district-friends_internal_models.ChatRoomMember:
     properties:
       id:
         type: integer
@@ -161,7 +48,7 @@ definitions:
       user_id:
         type: integer
     type: object
-  models.ExternalEvent:
+  district-friends_internal_models.ExternalEvent:
     properties:
       date:
         description: String format for simplicity
@@ -186,7 +73,7 @@ definitions:
       url:
         type: string
     type: object
-  models.Friendship:
+  district-friends_internal_models.Friendship:
     properties:
       created_at:
         type: string
@@ -195,13 +82,13 @@ definitions:
       id:
         type: integer
       status:
-        $ref: '#/definitions/models.FriendshipStatus'
+        $ref: '#/definitions/district-friends_internal_models.FriendshipStatus'
       updated_at:
         type: string
       user_id:
         type: integer
     type: object
-  models.FriendshipStatus:
+  district-friends_internal_models.FriendshipStatus:
     enum:
     - pending
     - accepted
@@ -211,7 +98,7 @@ definitions:
     - StatusPending
     - StatusAccepted
     - StatusDeclined
-  models.Message:
+  district-friends_internal_models.Message:
     properties:
       content:
         type: string
@@ -230,7 +117,7 @@ definitions:
       sender_id:
         type: integer
     type: object
-  models.User:
+  district-friends_internal_models.User:
     properties:
       created_at:
         type: string
@@ -246,6 +133,119 @@ definitions:
         type: string
       username:
         type: string
+    type: object
+  internal_api_handlers.CreateBookingReq:
+    properties:
+      booked_for_phone:
+        description: Optional
+        type: string
+      external_event_id:
+        type: string
+      external_event_type:
+        type: string
+      quantity:
+        type: integer
+      total_price:
+        type: number
+      user_phone:
+        type: string
+    required:
+    - external_event_id
+    - external_event_type
+    - quantity
+    - user_phone
+    type: object
+  internal_api_handlers.CreateProfileRequest:
+    properties:
+      email:
+        type: string
+      mobile_number:
+        type: string
+      name:
+        type: string
+      username:
+        description: Optional for profile creation
+        type: string
+    required:
+    - email
+    - mobile_number
+    - name
+    type: object
+  internal_api_handlers.CreateRoomReq:
+    properties:
+      name:
+        type: string
+      user_phone:
+        type: string
+    required:
+    - name
+    - user_phone
+    type: object
+  internal_api_handlers.FriendRequestReq:
+    properties:
+      friend_phone:
+        type: string
+      user_phone:
+        type: string
+    required:
+    - friend_phone
+    - user_phone
+    type: object
+  internal_api_handlers.FriendResponse:
+    properties:
+      created_at:
+        type: string
+      email:
+        type: string
+      id:
+        type: integer
+      mobile_number:
+        type: string
+      name:
+        type: string
+      status:
+        type: string
+      updated_at:
+        type: string
+      username:
+        type: string
+    type: object
+  internal_api_handlers.HandleRoomInviteReq:
+    properties:
+      user_phone:
+        type: string
+    required:
+    - user_phone
+    type: object
+  internal_api_handlers.InviteRoomReq:
+    properties:
+      invitee_phone:
+        type: string
+      inviter_phone:
+        type: string
+    required:
+    - invitee_phone
+    - inviter_phone
+    type: object
+  internal_api_handlers.JoinRoomReq:
+    properties:
+      user_phone:
+        type: string
+    required:
+    - user_phone
+    type: object
+  internal_api_handlers.ShareEventReq:
+    properties:
+      external_event_id:
+        type: string
+      external_event_type:
+        type: string
+      user_phone:
+        type: string
+    required:
+    - external_event_id
+    - external_event_type
+    - user_phone
     type: object
 host: localhost:8080
 info:
@@ -271,7 +271,7 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/models.Booking'
+              $ref: '#/definitions/district-friends_internal_models.Booking'
             type: array
         "400":
           description: Bad Request
@@ -296,14 +296,14 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/handlers.CreateBookingReq'
+          $ref: '#/definitions/internal_api_handlers.CreateBookingReq'
       produces:
       - application/json
       responses:
         "201":
           description: Created
           schema:
-            $ref: '#/definitions/models.Booking'
+            $ref: '#/definitions/district-friends_internal_models.Booking'
         "400":
           description: Bad Request
           schema:
@@ -337,7 +337,7 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/models.ExternalEvent'
+              $ref: '#/definitions/district-friends_internal_models.ExternalEvent'
             type: array
         "500":
           description: Internal Server Error
@@ -362,7 +362,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/models.ExternalEvent'
+            $ref: '#/definitions/district-friends_internal_models.ExternalEvent'
         "400":
           description: Bad Request
           schema:
@@ -387,7 +387,7 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/models.ExternalEvent'
+              $ref: '#/definitions/district-friends_internal_models.ExternalEvent'
             type: array
         "500":
           description: Internal Server Error
@@ -413,7 +413,7 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/handlers.FriendResponse'
+              $ref: '#/definitions/internal_api_handlers.FriendResponse'
             type: array
         "400":
           description: Bad Request
@@ -444,14 +444,14 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/handlers.FriendRequestReq'
+          $ref: '#/definitions/internal_api_handlers.FriendRequestReq'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/models.Friendship'
+            $ref: '#/definitions/district-friends_internal_models.Friendship'
         "400":
           description: Bad Request
           schema:
@@ -481,14 +481,14 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/handlers.FriendRequestReq'
+          $ref: '#/definitions/internal_api_handlers.FriendRequestReq'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/models.Friendship'
+            $ref: '#/definitions/district-friends_internal_models.Friendship'
         "400":
           description: Bad Request
           schema:
@@ -518,14 +518,14 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/handlers.FriendRequestReq'
+          $ref: '#/definitions/internal_api_handlers.FriendRequestReq'
       produces:
       - application/json
       responses:
         "201":
           description: Created
           schema:
-            $ref: '#/definitions/models.Friendship'
+            $ref: '#/definitions/district-friends_internal_models.Friendship'
         "400":
           description: Bad Request
           schema:
@@ -560,7 +560,7 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/handlers.FriendResponse'
+              $ref: '#/definitions/internal_api_handlers.FriendResponse'
             type: array
         "400":
           description: Bad Request
@@ -596,7 +596,7 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/handlers.FriendResponse'
+              $ref: '#/definitions/internal_api_handlers.FriendResponse'
             type: array
         "400":
           description: Bad Request
@@ -667,7 +667,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/models.User'
+            $ref: '#/definitions/district-friends_internal_models.User'
         "400":
           description: Bad Request
           schema:
@@ -696,14 +696,14 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/handlers.CreateProfileRequest'
+          $ref: '#/definitions/internal_api_handlers.CreateProfileRequest'
       produces:
       - application/json
       responses:
         "201":
           description: Created
           schema:
-            $ref: '#/definitions/models.User'
+            $ref: '#/definitions/district-friends_internal_models.User'
         "400":
           description: Bad Request
           schema:
@@ -733,7 +733,7 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/models.ChatRoom'
+              $ref: '#/definitions/district-friends_internal_models.ChatRoom'
             type: array
         "400":
           description: Bad Request
@@ -763,14 +763,14 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/handlers.CreateRoomReq'
+          $ref: '#/definitions/internal_api_handlers.CreateRoomReq'
       produces:
       - application/json
       responses:
         "201":
           description: Created
           schema:
-            $ref: '#/definitions/models.ChatRoom'
+            $ref: '#/definitions/district-friends_internal_models.ChatRoom'
         "400":
           description: Bad Request
           schema:
@@ -805,14 +805,14 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/handlers.HandleRoomInviteReq'
+          $ref: '#/definitions/internal_api_handlers.HandleRoomInviteReq'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/models.ChatRoomMember'
+            $ref: '#/definitions/district-friends_internal_models.ChatRoomMember'
         "400":
           description: Bad Request
           schema:
@@ -848,14 +848,14 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/handlers.InviteRoomReq'
+          $ref: '#/definitions/internal_api_handlers.InviteRoomReq'
       produces:
       - application/json
       responses:
         "201":
           description: Created
           schema:
-            $ref: '#/definitions/models.ChatRoomMember'
+            $ref: '#/definitions/district-friends_internal_models.ChatRoomMember'
         "400":
           description: Bad Request
           schema:
@@ -895,14 +895,14 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/handlers.JoinRoomReq'
+          $ref: '#/definitions/internal_api_handlers.JoinRoomReq'
       produces:
       - application/json
       responses:
         "201":
           description: Created
           schema:
-            $ref: '#/definitions/models.ChatRoomMember'
+            $ref: '#/definitions/district-friends_internal_models.ChatRoomMember'
         "400":
           description: Bad Request
           schema:
@@ -914,6 +914,27 @@ paths:
             additionalProperties: true
             type: object
       summary: Join a chat room
+      tags:
+      - chat
+  /api/v1/rooms/{id}/members:
+    get:
+      description: Get all members in a specific chat room
+      parameters:
+      - description: Room ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/district-friends_internal_models.User'
+            type: array
+      summary: List Room Members
       tags:
       - chat
   /api/v1/rooms/{id}/messages:
@@ -932,7 +953,7 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/models.Message'
+              $ref: '#/definitions/district-friends_internal_models.Message'
             type: array
         "400":
           description: Bad Request
@@ -963,7 +984,7 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/handlers.HandleRoomInviteReq'
+          $ref: '#/definitions/internal_api_handlers.HandleRoomInviteReq'
       produces:
       - application/json
       responses:
@@ -1006,14 +1027,14 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/handlers.ShareEventReq'
+          $ref: '#/definitions/internal_api_handlers.ShareEventReq'
       produces:
       - application/json
       responses:
         "201":
           description: Created
           schema:
-            $ref: '#/definitions/models.Message'
+            $ref: '#/definitions/district-friends_internal_models.Message'
         "400":
           description: Bad Request
           schema:
@@ -1062,7 +1083,7 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/models.ChatRoom'
+              $ref: '#/definitions/district-friends_internal_models.ChatRoom'
             type: array
         "400":
           description: Bad Request
