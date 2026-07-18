@@ -39,7 +39,7 @@ func (s *FoursquareService) FetchDining() ([]models.ExternalEvent, error) {
 		return nil, fmt.Errorf("Foursquare_SERVICE_API is not set")
 	}
 
-	url := fmt.Sprintf("%s/places/search?query=restaurant&near=New York&limit=10", s.BaseURL)
+	url := fmt.Sprintf("%s/places/search?query=restaurant&near=New%%20York&limit=10", s.BaseURL)
 
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {

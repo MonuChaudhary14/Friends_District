@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"log"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -93,16 +94,22 @@ func (h *EventHandler) GetSpotlight(c *gin.Context) {
 	movies, err := h.TMDB.FetchMovies()
 	if err == nil && len(movies) > 0 {
 		spotlights = append(spotlights, movies[0])
+	} else {
+		log.Printf("TMDB Error: %v", err)
 	}
 
 	concerts, err := h.Ticketmaster.FetchConcerts()
 	if err == nil && len(concerts) > 0 {
 		spotlights = append(spotlights, concerts[0])
+	} else {
+		log.Printf("Ticketmaster Error: %v", err)
 	}
 
 	dining, err := h.Foursquare.FetchDining()
 	if err == nil && len(dining) > 0 {
 		spotlights = append(spotlights, dining[0])
+	} else {
+		log.Printf("Foursquare Error: %v", err)
 	}
 
 	c.JSON(http.StatusOK, spotlights)
