@@ -1,0 +1,200 @@
+basePath: /
+definitions:
+  district-friends_internal_models.Friendship:
+    properties:
+      created_at:
+        type: string
+      friend_id:
+        type: integer
+      id:
+        type: integer
+      status:
+        $ref: '#/definitions/district-friends_internal_models.FriendshipStatus'
+      updated_at:
+        type: string
+      user_id:
+        type: integer
+    type: object
+  district-friends_internal_models.FriendshipStatus:
+    enum:
+    - pending
+    - accepted
+    - declined
+    type: string
+    x-enum-varnames:
+    - StatusPending
+    - StatusAccepted
+    - StatusDeclined
+  district-friends_internal_models.User:
+    properties:
+      created_at:
+        type: string
+      email:
+        type: string
+      id:
+        type: integer
+      updated_at:
+        type: string
+      username:
+        type: string
+    type: object
+  internal_api_handlers.CreateUserRequest:
+    properties:
+      email:
+        type: string
+      username:
+        type: string
+    required:
+    - email
+    - username
+    type: object
+  internal_api_handlers.FriendRequestReq:
+    properties:
+      friend_id:
+        type: integer
+      user_id:
+        type: integer
+    required:
+    - friend_id
+    - user_id
+    type: object
+host: localhost:8080
+info:
+  contact: {}
+  description: This is a friends feature extension backend.
+  title: Friends District API
+  version: "1.0"
+paths:
+  /api/v1/friends:
+    get:
+      description: Retrieve a list of accepted friends for a user
+      parameters:
+      - description: User ID
+        in: query
+        name: user_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/district-friends_internal_models.User'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: List friends
+      tags:
+      - friends
+  /api/v1/friends/accept:
+    post:
+      consumes:
+      - application/json
+      description: Accept a pending friend request
+      parameters:
+      - description: Friend Request Info
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/internal_api_handlers.FriendRequestReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/district-friends_internal_models.Friendship'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Accept a friend request
+      tags:
+      - friends
+  /api/v1/friends/request:
+    post:
+      consumes:
+      - application/json
+      description: Send a friend request to another user
+      parameters:
+      - description: Friend Request Info
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/internal_api_handlers.FriendRequestReq'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/district-friends_internal_models.Friendship'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Send a friend request
+      tags:
+      - friends
+  /api/v1/users:
+    post:
+      consumes:
+      - application/json
+      description: Register a new user in the system
+      parameters:
+      - description: User Info
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/internal_api_handlers.CreateUserRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/district-friends_internal_models.User'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Create a user
+      tags:
+      - users
+swagger: "2.0"
