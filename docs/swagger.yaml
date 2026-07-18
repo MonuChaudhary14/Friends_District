@@ -1,9 +1,9 @@
 definitions:
   handlers.CreateBookingReq:
     properties:
-      booked_for_id:
+      booked_for_phone:
         description: Optional
-        type: integer
+        type: string
       external_event_id:
         type: string
       external_event_type:
@@ -12,13 +12,13 @@ definitions:
         type: integer
       total_price:
         type: number
-      user_id:
-        type: integer
+      user_phone:
+        type: string
     required:
     - external_event_id
     - external_event_type
     - quantity
-    - user_id
+    - user_phone
     type: object
   handlers.CreateProfileRequest:
     properties:
@@ -84,10 +84,10 @@ definitions:
     type: object
   handlers.JoinRoomReq:
     properties:
-      user_id:
-        type: integer
+      user_phone:
+        type: string
     required:
-    - user_id
+    - user_phone
     type: object
   handlers.ShareEventReq:
     properties:
@@ -95,12 +95,12 @@ definitions:
         type: string
       external_event_type:
         type: string
-      user_id:
-        type: integer
+      user_phone:
+        type: string
     required:
     - external_event_id
     - external_event_type
-    - user_id
+    - user_phone
     type: object
   models.Booking:
     properties:
@@ -241,11 +241,11 @@ paths:
       description: Get a list of bookings for a specific user (either bought by them,
         or bought for them)
       parameters:
-      - description: User ID
+      - description: User Phone
         in: query
-        name: user_id
+        name: user_phone
         required: true
-        type: integer
+        type: string
       produces:
       - application/json
       responses:
@@ -579,7 +579,7 @@ paths:
         name: id
         required: true
         type: integer
-      - description: User ID
+      - description: User Phone
         in: body
         name: request
         required: true
@@ -647,7 +647,7 @@ paths:
         name: id
         required: true
         type: integer
-      - description: User ID and External Event Details
+      - description: User Phone and External Event Details
         in: body
         name: request
         required: true
@@ -682,11 +682,11 @@ paths:
         name: id
         required: true
         type: integer
-      - description: User ID
+      - description: User Phone
         in: query
-        name: user_id
+        name: user_phone
         required: true
-        type: integer
+        type: string
       responses: {}
       summary: WebSocket for Chat Room
       tags:

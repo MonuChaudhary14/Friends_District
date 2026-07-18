@@ -27,9 +27,9 @@ const docTemplate = `{
                 "summary": "List Bookings",
                 "parameters": [
                     {
-                        "type": "integer",
-                        "description": "User ID",
-                        "name": "user_id",
+                        "type": "string",
+                        "description": "User Phone",
+                        "name": "user_phone",
                         "in": "query",
                         "required": true
                     }
@@ -527,7 +527,7 @@ const docTemplate = `{
                         "required": true
                     },
                     {
-                        "description": "User ID",
+                        "description": "User Phone",
                         "name": "request",
                         "in": "body",
                         "required": true,
@@ -628,7 +628,7 @@ const docTemplate = `{
                         "required": true
                     },
                     {
-                        "description": "User ID and External Event Details",
+                        "description": "User Phone and External Event Details",
                         "name": "request",
                         "in": "body",
                         "required": true,
@@ -677,9 +677,9 @@ const docTemplate = `{
                         "required": true
                     },
                     {
-                        "type": "integer",
-                        "description": "User ID",
-                        "name": "user_id",
+                        "type": "string",
+                        "description": "User Phone",
+                        "name": "user_phone",
                         "in": "query",
                         "required": true
                     }
@@ -743,12 +743,12 @@ const docTemplate = `{
                 "external_event_id",
                 "external_event_type",
                 "quantity",
-                "user_id"
+                "user_phone"
             ],
             "properties": {
-                "booked_for_id": {
+                "booked_for_phone": {
                     "description": "Optional",
-                    "type": "integer"
+                    "type": "string"
                 },
                 "external_event_id": {
                     "type": "string"
@@ -762,8 +762,8 @@ const docTemplate = `{
                 "total_price": {
                     "type": "number"
                 },
-                "user_id": {
-                    "type": "integer"
+                "user_phone": {
+                    "type": "string"
                 }
             }
         },
@@ -863,11 +863,11 @@ const docTemplate = `{
         "handlers.JoinRoomReq": {
             "type": "object",
             "required": [
-                "user_id"
+                "user_phone"
             ],
             "properties": {
-                "user_id": {
-                    "type": "integer"
+                "user_phone": {
+                    "type": "string"
                 }
             }
         },
@@ -876,7 +876,7 @@ const docTemplate = `{
             "required": [
                 "external_event_id",
                 "external_event_type",
-                "user_id"
+                "user_phone"
             ],
             "properties": {
                 "external_event_id": {
@@ -885,8 +885,8 @@ const docTemplate = `{
                 "external_event_type": {
                     "type": "string"
                 },
-                "user_id": {
-                    "type": "integer"
+                "user_phone": {
+                    "type": "string"
                 }
             }
         },

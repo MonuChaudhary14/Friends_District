@@ -20,8 +20,8 @@ func NewBookingHandler(db *gorm.DB) *BookingHandler {
 }
 
 type CreateBookingReq struct {
-	UserID            uint    `json:"user_id" binding:"required"`
-	BookedForID       *uint   `json:"booked_for_id"` // Optional
+	UserPhone         string  `json:"user_phone" binding:"required"`
+	BookedForPhone    *string `json:"booked_for_phone"` // Optional
 	ExternalEventID   string  `json:"external_event_id" binding:"required"`
 	ExternalEventType string  `json:"external_event_type" binding:"required"`
 	Quantity          int     `json:"quantity" binding:"required"`
@@ -46,12 +46,25 @@ func (h *BookingHandler) CreateBooking(c *gin.Context) {
 		return
 	}
 
+	var user models.User
+	if err := h.DB.Where("mobile_number = ?", req.UserPhone).First(&user).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
+		return
+	}
+
+	var bookedForID *uint
 	// If booking for someone else, verify friendship
-	if req.BookedForID != nil {
+	if req.BookedForPhone != nil {
+		var friend models.User
+		if err := h.DB.Where("mobile_number = ?", *req.BookedForPhone).First(&friend).Error; err != nil {
+			c.JSON(http.StatusNotFound, gin.H{"error": "Booked for user not found"})
+			return
+		}
+		bookedForID = &friend.ID
 		var friendship models.Friendship
 		err := h.DB.Where(
 			"((user_id = ? AND friend_id = ?) OR (user_id = ? AND friend_id = ?)) AND status = ?",
-			req.UserID, *req.BookedForID, *req.BookedForID, req.UserID, models.StatusAccepted,
+			user.ID, *bookedForID, *bookedForID, user.ID, models.StatusAccepted,
 		).First(&friendship).Error
 
 		if err != nil {
@@ -61,8 +74,8 @@ func (h *BookingHandler) CreateBooking(c *gin.Context) {
 	}
 
 	booking := models.Booking{
-		UserID:            req.UserID,
-		BookedForID:       req.BookedForID,
+		UserID:            user.ID,
+		BookedForID:       bookedForID,
 		ExternalEventID:   req.ExternalEventID,
 		ExternalEventType: req.ExternalEventType,
 		Quantity:          req.Quantity,
@@ -83,21 +96,26 @@ func (h *BookingHandler) CreateBooking(c *gin.Context) {
 // @Description Get a list of bookings for a specific user (either bought by them, or bought for them)
 // @Tags bookings
 // @Produce json
-// @Param user_id query int true "User ID"
+// @Param user_phone query string true "User Phone"
 // @Success 200 {array} models.Booking
 // @Failure 400 {object} map[string]interface{}
 // @Failure 500 {object} map[string]interface{}
 // @Router /api/v1/bookings [get]
 func (h *BookingHandler) ListBookings(c *gin.Context) {
-	userIDStr := c.Query("user_id")
-	userID, err := strconv.Atoi(userIDStr)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid user_id"})
+	userPhone := c.Query("user_phone")
+	if userPhone == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "user_phone is required"})
+		return
+	}
+
+	var user models.User
+	if err := h.DB.Where("mobile_number = ?", userPhone).First(&user).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
 		return
 	}
 
 	var bookings []models.Booking
-	if err := h.DB.Where("user_id = ? OR booked_for_id = ?", userID, userID).
+	if err := h.DB.Where("user_id = ? OR booked_for_id = ?", user.ID, user.ID).
 		Preload("User").Preload("BookedFor").Find(&bookings).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch bookings"})
 		return

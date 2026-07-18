@@ -58,7 +58,7 @@ func (h *ChatHandler) CreateRoom(c *gin.Context) {
 }
 
 type JoinRoomReq struct {
-	UserID uint `json:"user_id" binding:"required"`
+	UserPhone string `json:"user_phone" binding:"required"`
 }
 
 // @Summary Join a chat room
@@ -67,7 +67,7 @@ type JoinRoomReq struct {
 // @Accept json
 // @Produce json
 // @Param id path int true "Room ID"
-// @Param request body JoinRoomReq true "User ID"
+// @Param request body JoinRoomReq true "User Phone"
 // @Success 201 {object} models.ChatRoomMember
 // @Failure 400 {object} map[string]interface{}
 // @Failure 500 {object} map[string]interface{}
@@ -86,9 +86,15 @@ func (h *ChatHandler) JoinRoom(c *gin.Context) {
 		return
 	}
 
+	var user models.User
+	if err := h.DB.Where("mobile_number = ?", req.UserPhone).First(&user).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
+		return
+	}
+
 	member := models.ChatRoomMember{
 		RoomID:   uint(roomID),
-		UserID:   req.UserID,
+		UserID:   user.ID,
 		JoinedAt: time.Now(),
 	}
 
@@ -130,7 +136,7 @@ func (h *ChatHandler) GetMessages(c *gin.Context) {
 // @Description Connect to real-time chat via WebSocket
 // @Tags chat
 // @Param id path int true "Room ID"
-// @Param user_id query int true "User ID"
+// @Param user_phone query string true "User Phone"
 // @Router /api/v1/rooms/{id}/ws [get]
 func (h *ChatHandler) ServeWS(c *gin.Context) {
 	roomIDStr := c.Param("id")
@@ -140,10 +146,15 @@ func (h *ChatHandler) ServeWS(c *gin.Context) {
 		return
 	}
 
-	userIDStr := c.Query("user_id")
-	userID, err := strconv.Atoi(userIDStr)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "user_id is required"})
+	userPhone := c.Query("user_phone")
+	if userPhone == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "user_phone is required"})
+		return
+	}
+
+	var user models.User
+	if err := h.DB.Where("mobile_number = ?", userPhone).First(&user).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
 		return
 	}
 
@@ -163,7 +174,7 @@ func (h *ChatHandler) ServeWS(c *gin.Context) {
 
 		msg := models.Message{
 			RoomID:    uint(roomID),
-			SenderID:  uint(userID),
+			SenderID:  user.ID,
 			Content:   string(msgData),
 			CreatedAt: time.Now(),
 		}
@@ -182,7 +193,7 @@ func (h *ChatHandler) ServeWS(c *gin.Context) {
 }
 
 type ShareEventReq struct {
-	UserID            uint   `json:"user_id" binding:"required"`
+	UserPhone         string `json:"user_phone" binding:"required"`
 	ExternalEventID   string `json:"external_event_id" binding:"required"`
 	ExternalEventType string `json:"external_event_type" binding:"required"`
 }
@@ -193,7 +204,7 @@ type ShareEventReq struct {
 // @Accept json
 // @Produce json
 // @Param id path int true "Room ID"
-// @Param request body ShareEventReq true "User ID and External Event Details"
+// @Param request body ShareEventReq true "User Phone and External Event Details"
 // @Success 201 {object} models.Message
 // @Failure 400 {object} map[string]interface{}
 // @Failure 500 {object} map[string]interface{}
@@ -212,9 +223,15 @@ func (h *ChatHandler) ShareEvent(c *gin.Context) {
 		return
 	}
 
+	var user models.User
+	if err := h.DB.Where("mobile_number = ?", req.UserPhone).First(&user).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
+		return
+	}
+
 	msg := models.Message{
 		RoomID:            uint(roomID),
-		SenderID:          req.UserID,
+		SenderID:          user.ID,
 		ExternalEventID:   req.ExternalEventID,
 		ExternalEventType: req.ExternalEventType,
 		Content:           "Check out this " + req.ExternalEventType + " event!",
