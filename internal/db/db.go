@@ -32,6 +32,7 @@ func InitDB() *gorm.DB {
 		&models.ChatRoom{},
 		&models.ChatRoomMember{},
 		&models.Message{},
+		&models.Booking{},
 	)
 	if err != nil {
 		log.Fatalf("Failed to migrate database: %v", err)

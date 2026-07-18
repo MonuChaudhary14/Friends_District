@@ -15,6 +15,105 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
+        "/api/v1/bookings": {
+            "get": {
+                "description": "Get a list of bookings for a specific user (either bought by them, or bought for them)",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "bookings"
+                ],
+                "summary": "List Bookings",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "User ID",
+                        "name": "user_id",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/district-friends_internal_models.Booking"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Book a ticket for yourself or a friend",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "bookings"
+                ],
+                "summary": "Create a Booking",
+                "parameters": [
+                    {
+                        "description": "Booking Details",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/internal_api_handlers.CreateBookingReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/district-friends_internal_models.Booking"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
         "/api/v1/events": {
             "get": {
                 "description": "Get a list of mock events (movies, concerts, dining)",
@@ -525,6 +624,40 @@ const docTemplate = `{
         }
     },
     "definitions": {
+        "district-friends_internal_models.Booking": {
+            "type": "object",
+            "properties": {
+                "booked_for_id": {
+                    "description": "ID of the friend this ticket was bought for (optional)",
+                    "type": "integer"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "external_event_id": {
+                    "type": "string"
+                },
+                "external_event_type": {
+                    "description": "e.g., \"movie\" or \"concert\"",
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "quantity": {
+                    "type": "integer"
+                },
+                "status": {
+                    "type": "string"
+                },
+                "total_price": {
+                    "type": "number"
+                },
+                "user_id": {
+                    "type": "integer"
+                }
+            }
+        },
         "district-friends_internal_models.ChatRoom": {
             "type": "object",
             "properties": {
@@ -677,6 +810,36 @@ const docTemplate = `{
                 },
                 "username": {
                     "type": "string"
+                }
+            }
+        },
+        "internal_api_handlers.CreateBookingReq": {
+            "type": "object",
+            "required": [
+                "external_event_id",
+                "external_event_type",
+                "quantity",
+                "user_id"
+            ],
+            "properties": {
+                "booked_for_id": {
+                    "description": "Optional",
+                    "type": "integer"
+                },
+                "external_event_id": {
+                    "type": "string"
+                },
+                "external_event_type": {
+                    "type": "string"
+                },
+                "quantity": {
+                    "type": "integer"
+                },
+                "total_price": {
+                    "type": "number"
+                },
+                "user_id": {
+                    "type": "integer"
                 }
             }
         },

@@ -1,5 +1,28 @@
 basePath: /
 definitions:
+  district-friends_internal_models.Booking:
+    properties:
+      booked_for_id:
+        description: ID of the friend this ticket was bought for (optional)
+        type: integer
+      created_at:
+        type: string
+      external_event_id:
+        type: string
+      external_event_type:
+        description: e.g., "movie" or "concert"
+        type: string
+      id:
+        type: integer
+      quantity:
+        type: integer
+      status:
+        type: string
+      total_price:
+        type: number
+      user_id:
+        type: integer
+    type: object
   district-friends_internal_models.ChatRoom:
     properties:
       created_at:
@@ -104,6 +127,27 @@ definitions:
       username:
         type: string
     type: object
+  internal_api_handlers.CreateBookingReq:
+    properties:
+      booked_for_id:
+        description: Optional
+        type: integer
+      external_event_id:
+        type: string
+      external_event_type:
+        type: string
+      quantity:
+        type: integer
+      total_price:
+        type: number
+      user_id:
+        type: integer
+    required:
+    - external_event_id
+    - external_event_type
+    - quantity
+    - user_id
+    type: object
   internal_api_handlers.CreateRoomReq:
     properties:
       name:
@@ -158,6 +202,74 @@ info:
   title: Friends District API
   version: "1.0"
 paths:
+  /api/v1/bookings:
+    get:
+      description: Get a list of bookings for a specific user (either bought by them,
+        or bought for them)
+      parameters:
+      - description: User ID
+        in: query
+        name: user_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/district-friends_internal_models.Booking'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: List Bookings
+      tags:
+      - bookings
+    post:
+      consumes:
+      - application/json
+      description: Book a ticket for yourself or a friend
+      parameters:
+      - description: Booking Details
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/internal_api_handlers.CreateBookingReq'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/district-friends_internal_models.Booking'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "403":
+          description: Forbidden
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Create a Booking
+      tags:
+      - bookings
   /api/v1/events:
     get:
       description: Get a list of mock events (movies, concerts, dining)
