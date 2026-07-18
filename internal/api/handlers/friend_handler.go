@@ -204,6 +204,99 @@ func (h *FriendHandler) RejectFriendRequest(c *gin.Context) {
 	c.JSON(http.StatusOK, friendship)
 }
 
+// @Summary List sent friend requests
+// @Description Retrieve a list of pending friend requests sent by the user
+// @Tags friends
+// @Produce json
+// @Param user_phone query string true "User Mobile Number"
+// @Success 200 {array} FriendResponse
+// @Failure 400 {object} map[string]interface{}
+// @Failure 404 {object} map[string]interface{}
+// @Failure 500 {object} map[string]interface{}
+// @Router /api/v1/friends/requests/sent [get]
+func (h *FriendHandler) ListSentFriendRequests(c *gin.Context) {
+	userPhone := c.Query("user_phone")
+	if userPhone == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "user_phone is required"})
+		return
+	}
+
+	normUserPhone, err := utils.ValidateAndNormalizePhone(userPhone)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid user_phone: " + err.Error()})
+		return
+	}
+
+	var user models.User
+	if err := h.DB.Where("mobile_number = ?", normUserPhone).First(&user).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
+		return
+	}
+
+	var friendships []models.Friendship
+	if err := h.DB.Preload("Friend").Where("user_id = ? AND status = ?", user.ID, models.StatusPending).Find(&friendships).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to retrieve sent requests"})
+		return
+	}
+
+	requests := make([]FriendResponse, 0)
+	for _, f := range friendships {
+		requests = append(requests, FriendResponse{
+			User:   f.Friend,
+			Status: string(f.Status),
+		})
+	}
+
+	c.JSON(http.StatusOK, requests)
+}
+
+// @Summary List received friend requests
+// @Description Retrieve a list of pending friend requests received by the user
+// @Tags friends
+// @Produce json
+// @Param user_phone query string true "User Mobile Number"
+// @Success 200 {array} FriendResponse
+// @Failure 400 {object} map[string]interface{}
+// @Failure 404 {object} map[string]interface{}
+// @Failure 500 {object} map[string]interface{}
+// @Router /api/v1/friends/requests/received [get]
+func (h *FriendHandler) ListReceivedFriendRequests(c *gin.Context) {
+	userPhone := c.Query("user_phone")
+	if userPhone == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "user_phone is required"})
+		return
+	}
+
+	normUserPhone, err := utils.ValidateAndNormalizePhone(userPhone)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid user_phone: " + err.Error()})
+		return
+	}
+
+	var user models.User
+	if err := h.DB.Where("mobile_number = ?", normUserPhone).First(&user).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
+		return
+	}
+
+	var friendships []models.Friendship
+	// Notice we check where friend_id matches our user ID, and preload the User who sent it.
+	if err := h.DB.Preload("User").Where("friend_id = ? AND status = ?", user.ID, models.StatusPending).Find(&friendships).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to retrieve received requests"})
+		return
+	}
+
+	requests := make([]FriendResponse, 0)
+	for _, f := range friendships {
+		requests = append(requests, FriendResponse{
+			User:   f.User,
+			Status: string(f.Status),
+		})
+	}
+
+	c.JSON(http.StatusOK, requests)
+}
+
 type FriendResponse struct {
 	models.User
 	Status string `json:"status"`

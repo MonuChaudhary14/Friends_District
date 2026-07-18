@@ -521,6 +521,78 @@ paths:
       summary: Send a friend request
       tags:
       - friends
+  /api/v1/friends/requests/received:
+    get:
+      description: Retrieve a list of pending friend requests received by the user
+      parameters:
+      - description: User Mobile Number
+        in: query
+        name: user_phone
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/handlers.FriendResponse'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: List received friend requests
+      tags:
+      - friends
+  /api/v1/friends/requests/sent:
+    get:
+      description: Retrieve a list of pending friend requests sent by the user
+      parameters:
+      - description: User Mobile Number
+        in: query
+        name: user_phone
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/handlers.FriendResponse'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: List sent friend requests
+      tags:
+      - friends
   /api/v1/friends/status:
     get:
       description: Get the current friendship status between two users via mobile
