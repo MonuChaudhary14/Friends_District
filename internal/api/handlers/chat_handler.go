@@ -245,7 +245,7 @@ func (h *ChatHandler) GetMessages(c *gin.Context) {
 	}
 
 	var messages []models.Message
-	if err := h.DB.Where("room_id = ?", roomID).Order("created_at asc").Find(&messages).Error; err != nil {
+	if err := h.DB.Preload("Sender").Where("room_id = ?", roomID).Order("created_at asc").Find(&messages).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch messages"})
 		return
 	}

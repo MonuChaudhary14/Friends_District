@@ -35,5 +35,5 @@ type Message struct {
 	CreatedAt         time.Time `json:"created_at"`
 
 	Room   ChatRoom `gorm:"foreignKey:RoomID" json:"-"`
-	Sender User     `gorm:"foreignKey:SenderID" json:"-"`
+	Sender User     `gorm:"foreignKey:SenderID" json:"sender,omitempty"`
 }
