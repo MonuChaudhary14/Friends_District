@@ -34,6 +34,7 @@ func NewEventHandler() *EventHandler {
 // @Router /api/v1/events [get]
 func (h *EventHandler) ListEvents(c *gin.Context) {
 	var allEvents = []models.ExternalEvent{}
+	var errors []string
 
 	eventType := c.Query("type")
 
@@ -54,6 +55,7 @@ func (h *EventHandler) ListEvents(c *gin.Context) {
 		if err == nil {
 			addEvents(movies)
 		} else {
+			errors = append(errors, fmt.Sprintf("TMDB Error: %v", err))
 			log.Printf("TMDB Error: %v", err)
 		}
 	}
@@ -64,6 +66,7 @@ func (h *EventHandler) ListEvents(c *gin.Context) {
 		if err == nil {
 			addEvents(concerts)
 		} else {
+			errors = append(errors, fmt.Sprintf("Ticketmaster Error: %v", err))
 			log.Printf("Ticketmaster Error: %v", err)
 		}
 	}
@@ -74,8 +77,14 @@ func (h *EventHandler) ListEvents(c *gin.Context) {
 		if err == nil {
 			addEvents(dining)
 		} else {
+			errors = append(errors, fmt.Sprintf("Foursquare Error: %v", err))
 			log.Printf("Foursquare Error: %v", err)
 		}
+	}
+	
+	if len(allEvents) == 0 && len(errors) > 0 {
+		c.JSON(http.StatusInternalServerError, gin.H{"errors": errors, "events": allEvents})
+		return
 	}
 
 	c.JSON(http.StatusOK, allEvents)
