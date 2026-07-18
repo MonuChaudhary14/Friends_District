@@ -1,0 +1,95 @@
+name: CI/CD - District Friends
+
+on:
+  push:
+    branches:
+      - main
+      - development
+
+jobs:
+  build:
+    name: Build Docker Bundle
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Create deploy bundle
+        run: |
+          tar -czf district-friends-bundle.tar.gz \
+            Dockerfile \
+            docker-compose.yml \
+            .dockerignore \
+            go.mod \
+            go.sum \
+            cmd \
+            internal \
+            docs
+
+      - name: Upload deploy artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: district-friends-bundle
+          path: district-friends-bundle.tar.gz
+
+  deploy:
+    name: Deploy District Friends to EC2
+    needs: build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Download deploy artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: district-friends-bundle
+          path: .
+
+      - name: Verify downloaded bundle
+        run: ls -lh district-friends-bundle.tar.gz
+
+      - name: Configure SSH
+        run: |
+          mkdir -p ~/.ssh
+
+          if [ -z "${{ secrets.EC2_KEY }}" ]; then
+            echo "EC2_KEY secret is missing"
+            exit 1
+          fi
+
+          if [ -z "${{ secrets.EC2_HOST }}" ]; then
+            echo " EC2_HOST secret is missing"
+            exit 1
+          fi
+
+          # IMPORTANT: use echo to preserve PEM formatting
+          echo "${{ secrets.EC2_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+
+          ssh-keyscan -H "${{ secrets.EC2_HOST }}" >> ~/.ssh/known_hosts
+
+      - name: Test SSH connection
+        run: |
+          ssh -o StrictHostKeyChecking=yes \
+              ubuntu@${{ secrets.EC2_HOST }} \
+              "echo SSH connection OK"
+
+      - name: Prepare directories on EC2
+        run: |
+          ssh ubuntu@${{ secrets.EC2_HOST }} \
+          "mkdir -p /home/ubuntu/district-friends"
+
+      - name: Copy deploy bundle to EC2
+        run: |
+          scp district-friends-bundle.tar.gz \
+          ubuntu@${{ secrets.EC2_HOST }}:/home/ubuntu/district-friends/district-friends-bundle.tar.gz
+
+      - name: Deploy with Docker Compose
+        run: |
+          ssh ubuntu@${{ secrets.EC2_HOST }} << 'EOF'
+            set -e
+            cd /home/ubuntu/district-friends
+            tar -xzf district-friends-bundle.tar.gz
+            docker compose up -d --build
+            docker compose ps
+          EOF
