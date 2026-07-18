@@ -29,7 +29,7 @@ const docTemplate = `{
                     {
                         "type": "string",
                         "description": "User Phone",
-                        "name": "user_phone",
+                        "name": "username",
                         "in": "query",
                         "required": true
                     }
@@ -227,7 +227,7 @@ const docTemplate = `{
         },
         "/api/v1/friends": {
             "get": {
-                "description": "Retrieve a list of accepted friends for a user by mobile number",
+                "description": "Retrieve a list of accepted friends for a user by username",
                 "produces": [
                     "application/json"
                 ],
@@ -238,8 +238,8 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "User Mobile Number",
-                        "name": "user_phone",
+                        "description": "User Username",
+                        "name": "username",
                         "in": "query",
                         "required": true
                     }
@@ -280,7 +280,7 @@ const docTemplate = `{
         },
         "/api/v1/friends/accept": {
             "post": {
-                "description": "Accept a pending friend request using mobile numbers",
+                "description": "Accept a pending friend request using usernames",
                 "consumes": [
                     "application/json"
                 ],
@@ -335,7 +335,7 @@ const docTemplate = `{
         },
         "/api/v1/friends/reject": {
             "post": {
-                "description": "Reject a pending friend request using mobile numbers",
+                "description": "Reject a pending friend request using usernames",
                 "consumes": [
                     "application/json"
                 ],
@@ -390,7 +390,7 @@ const docTemplate = `{
         },
         "/api/v1/friends/request": {
             "post": {
-                "description": "Send a friend request to another user using mobile numbers",
+                "description": "Send a friend request to another user using usernames",
                 "consumes": [
                     "application/json"
                 ],
@@ -456,8 +456,8 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "User Mobile Number",
-                        "name": "user_phone",
+                        "description": "User Username",
+                        "name": "username",
                         "in": "query",
                         "required": true
                     }
@@ -509,8 +509,8 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "User Mobile Number",
-                        "name": "user_phone",
+                        "description": "User Username",
+                        "name": "username",
                         "in": "query",
                         "required": true
                     }
@@ -551,7 +551,7 @@ const docTemplate = `{
         },
         "/api/v1/friends/status": {
             "get": {
-                "description": "Get the current friendship status between two users via mobile numbers",
+                "description": "Get the current friendship status between two users via usernames",
                 "produces": [
                     "application/json"
                 ],
@@ -562,14 +562,14 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "User Mobile Number",
-                        "name": "user_phone",
+                        "description": "User Username",
+                        "name": "username",
                         "in": "query",
                         "required": true
                     },
                     {
                         "type": "string",
-                        "description": "Friend Mobile Number",
+                        "description": "Friend Username",
                         "name": "friend_phone",
                         "in": "query",
                         "required": true
@@ -600,9 +600,71 @@ const docTemplate = `{
                 }
             }
         },
+        "/api/v1/messages/{id}/vote": {
+            "post": {
+                "description": "Cast or update a vote on a message containing an external event",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "chat"
+                ],
+                "summary": "Vote on a shared event message",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Message ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Vote Details",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/internal_api_handlers.VoteMessageReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/district-friends_internal_models.MessageVote"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
         "/api/v1/profile": {
             "get": {
-                "description": "Retrieve a user's profile using their mobile number",
+                "description": "Retrieve a user's profile using their username",
                 "produces": [
                     "application/json"
                 ],
@@ -613,8 +675,8 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "Mobile Number",
-                        "name": "mobile_number",
+                        "description": "Username",
+                        "name": "username",
                         "in": "query",
                         "required": true
                     }
@@ -710,7 +772,7 @@ const docTemplate = `{
                     {
                         "type": "string",
                         "description": "User Phone",
-                        "name": "user_phone",
+                        "name": "username",
                         "in": "query",
                         "required": true
                     }
@@ -816,7 +878,7 @@ const docTemplate = `{
                     {
                         "type": "string",
                         "description": "User Phone",
-                        "name": "user_phone",
+                        "name": "username",
                         "in": "query",
                         "required": true
                     }
@@ -939,7 +1001,7 @@ const docTemplate = `{
                         "required": true
                     },
                     {
-                        "description": "Inviter and Invitee Phones",
+                        "description": "Inviter and Invitee Usernames",
                         "name": "request",
                         "in": "body",
                         "required": true,
@@ -1255,7 +1317,7 @@ const docTemplate = `{
                     {
                         "type": "string",
                         "description": "User Phone",
-                        "name": "user_phone",
+                        "name": "username",
                         "in": "query",
                         "required": true
                     }
@@ -1423,6 +1485,12 @@ const docTemplate = `{
                     "description": "String ID from external API (TMDB/Ticketmaster)",
                     "type": "string"
                 },
+                "external_event_image_url": {
+                    "type": "string"
+                },
+                "external_event_name": {
+                    "type": "string"
+                },
                 "external_event_type": {
                     "description": "\"movie\" or \"concert\"",
                     "type": "string"
@@ -1433,8 +1501,44 @@ const docTemplate = `{
                 "room_id": {
                     "type": "integer"
                 },
+                "sender": {
+                    "$ref": "#/definitions/district-friends_internal_models.User"
+                },
                 "sender_id": {
                     "type": "integer"
+                },
+                "votes": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/district-friends_internal_models.MessageVote"
+                    }
+                }
+            }
+        },
+        "district-friends_internal_models.MessageVote": {
+            "type": "object",
+            "properties": {
+                "created_at": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "message_id": {
+                    "type": "integer"
+                },
+                "updated_at": {
+                    "type": "string"
+                },
+                "user": {
+                    "$ref": "#/definitions/district-friends_internal_models.User"
+                },
+                "user_id": {
+                    "type": "integer"
+                },
+                "vote": {
+                    "description": "\"interested\", \"maybe\", \"not_interested\"",
+                    "type": "string"
                 }
             }
         },
@@ -1470,10 +1574,10 @@ const docTemplate = `{
                 "external_event_id",
                 "external_event_type",
                 "quantity",
-                "user_phone"
+                "username"
             ],
             "properties": {
-                "booked_for_phone": {
+                "booked_for_username": {
                     "description": "Optional",
                     "type": "string"
                 },
@@ -1489,7 +1593,7 @@ const docTemplate = `{
                 "total_price": {
                     "type": "number"
                 },
-                "user_phone": {
+                "username": {
                     "type": "string"
                 }
             }
@@ -1521,13 +1625,13 @@ const docTemplate = `{
             "type": "object",
             "required": [
                 "name",
-                "user_phone"
+                "username"
             ],
             "properties": {
                 "name": {
                     "type": "string"
                 },
-                "user_phone": {
+                "username": {
                     "type": "string"
                 }
             }
@@ -1535,14 +1639,14 @@ const docTemplate = `{
         "internal_api_handlers.FriendRequestReq": {
             "type": "object",
             "required": [
-                "friend_phone",
-                "user_phone"
+                "friend_username",
+                "username"
             ],
             "properties": {
-                "friend_phone": {
+                "friend_username": {
                     "type": "string"
                 },
-                "user_phone": {
+                "username": {
                     "type": "string"
                 }
             }
@@ -1579,10 +1683,10 @@ const docTemplate = `{
         "internal_api_handlers.HandleRoomInviteReq": {
             "type": "object",
             "required": [
-                "user_phone"
+                "username"
             ],
             "properties": {
-                "user_phone": {
+                "username": {
                     "type": "string"
                 }
             }
@@ -1590,14 +1694,14 @@ const docTemplate = `{
         "internal_api_handlers.InviteRoomReq": {
             "type": "object",
             "required": [
-                "invitee_phone",
-                "inviter_phone"
+                "invitee_username",
+                "inviter_username"
             ],
             "properties": {
-                "invitee_phone": {
+                "invitee_username": {
                     "type": "string"
                 },
-                "inviter_phone": {
+                "inviter_username": {
                     "type": "string"
                 }
             }
@@ -1605,10 +1709,10 @@ const docTemplate = `{
         "internal_api_handlers.JoinRoomReq": {
             "type": "object",
             "required": [
-                "user_phone"
+                "username"
             ],
             "properties": {
-                "user_phone": {
+                "username": {
                     "type": "string"
                 }
             }
@@ -1617,17 +1721,41 @@ const docTemplate = `{
             "type": "object",
             "required": [
                 "external_event_id",
+                "external_event_image_url",
+                "external_event_name",
                 "external_event_type",
-                "user_phone"
+                "username"
             ],
             "properties": {
                 "external_event_id": {
                     "type": "string"
                 },
+                "external_event_image_url": {
+                    "type": "string"
+                },
+                "external_event_name": {
+                    "type": "string"
+                },
                 "external_event_type": {
                     "type": "string"
                 },
-                "user_phone": {
+                "username": {
+                    "type": "string"
+                }
+            }
+        },
+        "internal_api_handlers.VoteMessageReq": {
+            "type": "object",
+            "required": [
+                "username",
+                "vote"
+            ],
+            "properties": {
+                "username": {
+                    "type": "string"
+                },
+                "vote": {
+                    "description": "\"interested\", \"maybe\", \"not_interested\"",
                     "type": "string"
                 }
             }

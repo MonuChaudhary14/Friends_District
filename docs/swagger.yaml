@@ -107,6 +107,10 @@ definitions:
       external_event_id:
         description: String ID from external API (TMDB/Ticketmaster)
         type: string
+      external_event_image_url:
+        type: string
+      external_event_name:
+        type: string
       external_event_type:
         description: '"movie" or "concert"'
         type: string
@@ -114,8 +118,32 @@ definitions:
         type: integer
       room_id:
         type: integer
+      sender:
+        $ref: '#/definitions/district-friends_internal_models.User'
       sender_id:
         type: integer
+      votes:
+        items:
+          $ref: '#/definitions/district-friends_internal_models.MessageVote'
+        type: array
+    type: object
+  district-friends_internal_models.MessageVote:
+    properties:
+      created_at:
+        type: string
+      id:
+        type: integer
+      message_id:
+        type: integer
+      updated_at:
+        type: string
+      user:
+        $ref: '#/definitions/district-friends_internal_models.User'
+      user_id:
+        type: integer
+      vote:
+        description: '"interested", "maybe", "not_interested"'
+        type: string
     type: object
   district-friends_internal_models.User:
     properties:
@@ -136,7 +164,7 @@ definitions:
     type: object
   internal_api_handlers.CreateBookingReq:
     properties:
-      booked_for_phone:
+      booked_for_username:
         description: Optional
         type: string
       external_event_id:
@@ -147,13 +175,13 @@ definitions:
         type: integer
       total_price:
         type: number
-      user_phone:
+      username:
         type: string
     required:
     - external_event_id
     - external_event_type
     - quantity
-    - user_phone
+    - username
     type: object
   internal_api_handlers.CreateProfileRequest:
     properties:
@@ -175,21 +203,21 @@ definitions:
     properties:
       name:
         type: string
-      user_phone:
+      username:
         type: string
     required:
     - name
-    - user_phone
+    - username
     type: object
   internal_api_handlers.FriendRequestReq:
     properties:
-      friend_phone:
+      friend_username:
         type: string
-      user_phone:
+      username:
         type: string
     required:
-    - friend_phone
-    - user_phone
+    - friend_username
+    - username
     type: object
   internal_api_handlers.FriendResponse:
     properties:
@@ -212,40 +240,57 @@ definitions:
     type: object
   internal_api_handlers.HandleRoomInviteReq:
     properties:
-      user_phone:
+      username:
         type: string
     required:
-    - user_phone
+    - username
     type: object
   internal_api_handlers.InviteRoomReq:
     properties:
-      invitee_phone:
+      invitee_username:
         type: string
-      inviter_phone:
+      inviter_username:
         type: string
     required:
-    - invitee_phone
-    - inviter_phone
+    - invitee_username
+    - inviter_username
     type: object
   internal_api_handlers.JoinRoomReq:
     properties:
-      user_phone:
+      username:
         type: string
     required:
-    - user_phone
+    - username
     type: object
   internal_api_handlers.ShareEventReq:
     properties:
       external_event_id:
         type: string
+      external_event_image_url:
+        type: string
+      external_event_name:
+        type: string
       external_event_type:
         type: string
-      user_phone:
+      username:
         type: string
     required:
     - external_event_id
+    - external_event_image_url
+    - external_event_name
     - external_event_type
-    - user_phone
+    - username
+    type: object
+  internal_api_handlers.VoteMessageReq:
+    properties:
+      username:
+        type: string
+      vote:
+        description: '"interested", "maybe", "not_interested"'
+        type: string
+    required:
+    - username
+    - vote
     type: object
 host: localhost:8080
 info:
@@ -261,7 +306,7 @@ paths:
       parameters:
       - description: User Phone
         in: query
-        name: user_phone
+        name: username
         required: true
         type: string
       produces:
@@ -399,11 +444,11 @@ paths:
       - events
   /api/v1/friends:
     get:
-      description: Retrieve a list of accepted friends for a user by mobile number
+      description: Retrieve a list of accepted friends for a user by username
       parameters:
-      - description: User Mobile Number
+      - description: User Username
         in: query
-        name: user_phone
+        name: username
         required: true
         type: string
       produces:
@@ -437,7 +482,7 @@ paths:
     post:
       consumes:
       - application/json
-      description: Accept a pending friend request using mobile numbers
+      description: Accept a pending friend request using usernames
       parameters:
       - description: Friend Request Info
         in: body
@@ -474,7 +519,7 @@ paths:
     post:
       consumes:
       - application/json
-      description: Reject a pending friend request using mobile numbers
+      description: Reject a pending friend request using usernames
       parameters:
       - description: Friend Request Info
         in: body
@@ -511,7 +556,7 @@ paths:
     post:
       consumes:
       - application/json
-      description: Send a friend request to another user using mobile numbers
+      description: Send a friend request to another user using usernames
       parameters:
       - description: Friend Request Info
         in: body
@@ -548,9 +593,9 @@ paths:
     get:
       description: Retrieve a list of pending friend requests received by the user
       parameters:
-      - description: User Mobile Number
+      - description: User Username
         in: query
-        name: user_phone
+        name: username
         required: true
         type: string
       produces:
@@ -584,9 +629,9 @@ paths:
     get:
       description: Retrieve a list of pending friend requests sent by the user
       parameters:
-      - description: User Mobile Number
+      - description: User Username
         in: query
-        name: user_phone
+        name: username
         required: true
         type: string
       produces:
@@ -618,15 +663,14 @@ paths:
       - friends
   /api/v1/friends/status:
     get:
-      description: Get the current friendship status between two users via mobile
-        numbers
+      description: Get the current friendship status between two users via usernames
       parameters:
-      - description: User Mobile Number
+      - description: User Username
         in: query
-        name: user_phone
+        name: username
         required: true
         type: string
-      - description: Friend Mobile Number
+      - description: Friend Username
         in: query
         name: friend_phone
         required: true
@@ -652,13 +696,55 @@ paths:
       summary: Get friend status
       tags:
       - friends
+  /api/v1/messages/{id}/vote:
+    post:
+      consumes:
+      - application/json
+      description: Cast or update a vote on a message containing an external event
+      parameters:
+      - description: Message ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Vote Details
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/internal_api_handlers.VoteMessageReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/district-friends_internal_models.MessageVote'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Vote on a shared event message
+      tags:
+      - chat
   /api/v1/profile:
     get:
-      description: Retrieve a user's profile using their mobile number
+      description: Retrieve a user's profile using their username
       parameters:
-      - description: Mobile Number
+      - description: Username
         in: query
-        name: mobile_number
+        name: username
         required: true
         type: string
       produces:
@@ -723,7 +809,7 @@ paths:
       parameters:
       - description: User Phone
         in: query
-        name: user_phone
+        name: username
         required: true
         type: string
       produces:
@@ -843,7 +929,7 @@ paths:
         name: id
         required: true
         type: integer
-      - description: Inviter and Invitee Phones
+      - description: Inviter and Invitee Usernames
         in: body
         name: request
         required: true
@@ -1059,7 +1145,7 @@ paths:
         type: integer
       - description: User Phone
         in: query
-        name: user_phone
+        name: username
         required: true
         type: string
       responses: {}
@@ -1073,7 +1159,7 @@ paths:
       parameters:
       - description: User Phone
         in: query
-        name: user_phone
+        name: username
         required: true
         type: string
       produces:

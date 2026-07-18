@@ -23,7 +23,7 @@ type FriendRequestReq struct {
 }
 
 // @Summary Send a friend request
-// @Description Send a friend request to another user using mobile numbers
+// @Description Send a friend request to another user using usernames
 // @Tags friends
 // @Accept json
 // @Produce json
@@ -97,7 +97,7 @@ func (h *FriendHandler) SendFriendRequest(c *gin.Context) {
 }
 
 // @Summary Accept a friend request
-// @Description Accept a pending friend request using mobile numbers
+// @Description Accept a pending friend request using usernames
 // @Tags friends
 // @Accept json
 // @Produce json
@@ -157,7 +157,7 @@ func (h *FriendHandler) AcceptFriendRequest(c *gin.Context) {
 }
 
 // @Summary Reject a friend request
-// @Description Reject a pending friend request using mobile numbers
+// @Description Reject a pending friend request using usernames
 // @Tags friends
 // @Accept json
 // @Produce json
@@ -209,7 +209,7 @@ func (h *FriendHandler) RejectFriendRequest(c *gin.Context) {
 // @Description Retrieve a list of pending friend requests sent by the user
 // @Tags friends
 // @Produce json
-// @Param username query string true "User Mobile Number"
+// @Param username query string true "User Username"
 // @Success 200 {array} FriendResponse
 // @Failure 400 {object} map[string]interface{}
 // @Failure 404 {object} map[string]interface{}
@@ -249,7 +249,7 @@ func (h *FriendHandler) ListSentFriendRequests(c *gin.Context) {
 // @Description Retrieve a list of pending friend requests received by the user
 // @Tags friends
 // @Produce json
-// @Param username query string true "User Mobile Number"
+// @Param username query string true "User Username"
 // @Success 200 {array} FriendResponse
 // @Failure 400 {object} map[string]interface{}
 // @Failure 404 {object} map[string]interface{}
@@ -292,10 +292,10 @@ type FriendResponse struct {
 }
 
 // @Summary List friends
-// @Description Retrieve a list of accepted friends for a user by mobile number
+// @Description Retrieve a list of accepted friends for a user by username
 // @Tags friends
 // @Produce json
-// @Param username query string true "User Mobile Number"
+// @Param username query string true "User Username"
 // @Success 200 {array} FriendResponse
 // @Failure 400 {object} map[string]interface{}
 // @Failure 404 {object} map[string]interface{}
@@ -332,11 +332,11 @@ func (h *FriendHandler) ListFriends(c *gin.Context) {
 }
 
 // @Summary Get friend status
-// @Description Get the current friendship status between two users via mobile numbers
+// @Description Get the current friendship status between two users via usernames
 // @Tags friends
 // @Produce json
-// @Param username query string true "User Mobile Number"
-// @Param friend_phone query string true "Friend Mobile Number"
+// @Param username query string true "User Username"
+// @Param friend_phone query string true "Friend Username"
 // @Success 200 {object} map[string]interface{}
 // @Failure 400 {object} map[string]interface{}
 // @Failure 404 {object} map[string]interface{}

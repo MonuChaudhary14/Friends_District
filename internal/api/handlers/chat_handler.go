@@ -142,7 +142,7 @@ type InviteRoomReq struct {
 // @Accept json
 // @Produce json
 // @Param id path int true "Room ID"
-// @Param request body InviteRoomReq true "Inviter and Invitee Phones"
+// @Param request body InviteRoomReq true "Inviter and Invitee Usernames"
 // @Success 201 {object} models.ChatRoomMember
 // @Failure 400 {object} map[string]interface{}
 // @Failure 403 {object} map[string]interface{}
