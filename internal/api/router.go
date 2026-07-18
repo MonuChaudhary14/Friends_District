@@ -20,6 +20,7 @@ func SetupRouter(db *gorm.DB) *gin.Engine {
 	userHandler := handlers.NewUserHandler(db)
 	friendHandler := handlers.NewFriendHandler(db)
 	chatHandler := handlers.NewChatHandler(db)
+	eventHandler := handlers.NewEventHandler(db)
 
 	r.GET("/health", func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{
@@ -48,6 +49,13 @@ func SetupRouter(db *gorm.DB) *gin.Engine {
 			rooms.POST("/:id/join", chatHandler.JoinRoom)
 			rooms.GET("/:id/messages", chatHandler.GetMessages)
 			rooms.GET("/:id/ws", chatHandler.ServeWS)
+			rooms.POST("/:id/share", chatHandler.ShareEvent)
+		}
+
+		events := v1.Group("/events")
+		{
+			events.GET("", eventHandler.ListEvents)
+			events.GET("/:id", eventHandler.GetEvent)
 		}
 	}
 

@@ -29,8 +29,10 @@ type Message struct {
 	RoomID    uint      `gorm:"not null;index" json:"room_id"`
 	SenderID  uint      `gorm:"not null;index" json:"sender_id"`
 	Content   string    `gorm:"type:text;not null" json:"content"`
+	EventID   *uint     `json:"event_id,omitempty"` // If set, this message shares an event
 	CreatedAt time.Time `json:"created_at"`
 
 	Room   ChatRoom `gorm:"foreignKey:RoomID" json:"-"`
 	Sender User     `gorm:"foreignKey:SenderID" json:"-"`
+	Event  *Event   `gorm:"foreignKey:EventID" json:"-"`
 }

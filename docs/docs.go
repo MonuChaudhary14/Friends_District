@@ -15,6 +15,87 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
+        "/api/v1/events": {
+            "get": {
+                "description": "Get a list of mock events (movies, concerts, dining)",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "events"
+                ],
+                "summary": "List Events",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Filter by event type (e.g. Movie, Concert)",
+                        "name": "type",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/district-friends_internal_models.Event"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/events/{id}": {
+            "get": {
+                "description": "Get details for a specific event",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "events"
+                ],
+                "summary": "Get Event Details",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Event ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/district-friends_internal_models.Event"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
         "/api/v1/friends": {
             "get": {
                 "description": "Retrieve a list of accepted friends for a user",
@@ -313,6 +394,68 @@ const docTemplate = `{
                 }
             }
         },
+        "/api/v1/rooms/{id}/share": {
+            "post": {
+                "description": "Share a specific event to a chat room",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "chat"
+                ],
+                "summary": "Share an event in a chat room",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Room ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "User ID and Event ID",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/internal_api_handlers.ShareEventReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/district-friends_internal_models.Message"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
         "/api/v1/rooms/{id}/ws": {
             "get": {
                 "description": "Connect to real-time chat via WebSocket",
@@ -423,6 +566,42 @@ const docTemplate = `{
                 }
             }
         },
+        "district-friends_internal_models.Event": {
+            "type": "object",
+            "properties": {
+                "created_at": {
+                    "type": "string"
+                },
+                "date": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "image_url": {
+                    "type": "string"
+                },
+                "location": {
+                    "type": "string"
+                },
+                "price": {
+                    "type": "number"
+                },
+                "title": {
+                    "type": "string"
+                },
+                "type": {
+                    "description": "e.g., Movie, Concert, Dining, Laughter Show",
+                    "type": "string"
+                },
+                "updated_at": {
+                    "type": "string"
+                }
+            }
+        },
         "district-friends_internal_models.Friendship": {
             "type": "object",
             "properties": {
@@ -467,6 +646,10 @@ const docTemplate = `{
                 },
                 "created_at": {
                     "type": "string"
+                },
+                "event_id": {
+                    "description": "If set, this message shares an event",
+                    "type": "integer"
                 },
                 "id": {
                     "type": "integer"
@@ -546,6 +729,21 @@ const docTemplate = `{
                 "user_id"
             ],
             "properties": {
+                "user_id": {
+                    "type": "integer"
+                }
+            }
+        },
+        "internal_api_handlers.ShareEventReq": {
+            "type": "object",
+            "required": [
+                "event_id",
+                "user_id"
+            ],
+            "properties": {
+                "event_id": {
+                    "type": "integer"
+                },
                 "user_id": {
                     "type": "integer"
                 }

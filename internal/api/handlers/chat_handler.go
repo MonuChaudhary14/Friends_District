@@ -180,3 +180,60 @@ func (h *ChatHandler) ServeWS(c *gin.Context) {
 		}
 	}
 }
+
+type ShareEventReq struct {
+	UserID  uint `json:"user_id" binding:"required"`
+	EventID uint `json:"event_id" binding:"required"`
+}
+
+// @Summary Share an event in a chat room
+// @Description Share a specific event to a chat room
+// @Tags chat
+// @Accept json
+// @Produce json
+// @Param id path int true "Room ID"
+// @Param request body ShareEventReq true "User ID and Event ID"
+// @Success 201 {object} models.Message
+// @Failure 400 {object} map[string]interface{}
+// @Failure 404 {object} map[string]interface{}
+// @Failure 500 {object} map[string]interface{}
+// @Router /api/v1/rooms/{id}/share [post]
+func (h *ChatHandler) ShareEvent(c *gin.Context) {
+	roomIDStr := c.Param("id")
+	roomID, err := strconv.Atoi(roomIDStr)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid room ID"})
+		return
+	}
+
+	var req ShareEventReq
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	// Verify event exists
+	var event models.Event
+	if err := h.DB.First(&event, req.EventID).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Event not found"})
+		return
+	}
+
+	msg := models.Message{
+		RoomID:    uint(roomID),
+		SenderID:  req.UserID,
+		EventID:   &req.EventID,
+		Content:   "Check out this event: " + event.Title,
+		CreatedAt: time.Now(),
+	}
+
+	if err := h.DB.Create(&msg).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to share event"})
+		return
+	}
+
+	// Populate the event relation so it's returned in the response
+	h.DB.Preload("Event").First(&msg, msg.ID)
+
+	c.JSON(http.StatusCreated, msg)
+}

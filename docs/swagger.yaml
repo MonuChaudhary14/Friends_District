@@ -22,6 +22,30 @@ definitions:
       user_id:
         type: integer
     type: object
+  district-friends_internal_models.Event:
+    properties:
+      created_at:
+        type: string
+      date:
+        type: string
+      description:
+        type: string
+      id:
+        type: integer
+      image_url:
+        type: string
+      location:
+        type: string
+      price:
+        type: number
+      title:
+        type: string
+      type:
+        description: e.g., Movie, Concert, Dining, Laughter Show
+        type: string
+      updated_at:
+        type: string
+    type: object
   district-friends_internal_models.Friendship:
     properties:
       created_at:
@@ -53,6 +77,9 @@ definitions:
         type: string
       created_at:
         type: string
+      event_id:
+        description: If set, this message shares an event
+        type: integer
       id:
         type: integer
       room_id:
@@ -107,6 +134,16 @@ definitions:
     required:
     - user_id
     type: object
+  internal_api_handlers.ShareEventReq:
+    properties:
+      event_id:
+        type: integer
+      user_id:
+        type: integer
+    required:
+    - event_id
+    - user_id
+    type: object
 host: localhost:8080
 info:
   contact: {}
@@ -114,6 +151,60 @@ info:
   title: Friends District API
   version: "1.0"
 paths:
+  /api/v1/events:
+    get:
+      description: Get a list of mock events (movies, concerts, dining)
+      parameters:
+      - description: Filter by event type (e.g. Movie, Concert)
+        in: query
+        name: type
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/district-friends_internal_models.Event'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: List Events
+      tags:
+      - events
+  /api/v1/events/{id}:
+    get:
+      description: Get details for a specific event
+      parameters:
+      - description: Event ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/district-friends_internal_models.Event'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Get Event Details
+      tags:
+      - events
   /api/v1/friends:
     get:
       description: Retrieve a list of accepted friends for a user
@@ -312,6 +403,48 @@ paths:
             additionalProperties: true
             type: object
       summary: Get room messages
+      tags:
+      - chat
+  /api/v1/rooms/{id}/share:
+    post:
+      consumes:
+      - application/json
+      description: Share a specific event to a chat room
+      parameters:
+      - description: Room ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: User ID and Event ID
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/internal_api_handlers.ShareEventReq'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/district-friends_internal_models.Message'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Share an event in a chat room
       tags:
       - chat
   /api/v1/rooms/{id}/ws:
