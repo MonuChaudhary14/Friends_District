@@ -1,5 +1,27 @@
 basePath: /
 definitions:
+  district-friends_internal_models.ChatRoom:
+    properties:
+      created_at:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+      updated_at:
+        type: string
+    type: object
+  district-friends_internal_models.ChatRoomMember:
+    properties:
+      id:
+        type: integer
+      joined_at:
+        type: string
+      room_id:
+        type: integer
+      user_id:
+        type: integer
+    type: object
   district-friends_internal_models.Friendship:
     properties:
       created_at:
@@ -25,6 +47,19 @@ definitions:
     - StatusPending
     - StatusAccepted
     - StatusDeclined
+  district-friends_internal_models.Message:
+    properties:
+      content:
+        type: string
+      created_at:
+        type: string
+      id:
+        type: integer
+      room_id:
+        type: integer
+      sender_id:
+        type: integer
+    type: object
   district-friends_internal_models.User:
     properties:
       created_at:
@@ -37,6 +72,13 @@ definitions:
         type: string
       username:
         type: string
+    type: object
+  internal_api_handlers.CreateRoomReq:
+    properties:
+      name:
+        type: string
+    required:
+    - name
     type: object
   internal_api_handlers.CreateUserRequest:
     properties:
@@ -56,6 +98,13 @@ definitions:
         type: integer
     required:
     - friend_id
+    - user_id
+    type: object
+  internal_api_handlers.JoinRoomReq:
+    properties:
+      user_id:
+        type: integer
+    required:
     - user_id
     type: object
 host: localhost:8080
@@ -165,6 +214,124 @@ paths:
       summary: Send a friend request
       tags:
       - friends
+  /api/v1/rooms:
+    post:
+      consumes:
+      - application/json
+      description: Create a new chat room
+      parameters:
+      - description: Room Name
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/internal_api_handlers.CreateRoomReq'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/district-friends_internal_models.ChatRoom'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Create a chat room
+      tags:
+      - chat
+  /api/v1/rooms/{id}/join:
+    post:
+      consumes:
+      - application/json
+      description: Add a user to a chat room
+      parameters:
+      - description: Room ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: User ID
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/internal_api_handlers.JoinRoomReq'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/district-friends_internal_models.ChatRoomMember'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Join a chat room
+      tags:
+      - chat
+  /api/v1/rooms/{id}/messages:
+    get:
+      description: Retrieve message history for a chat room
+      parameters:
+      - description: Room ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/district-friends_internal_models.Message'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Get room messages
+      tags:
+      - chat
+  /api/v1/rooms/{id}/ws:
+    get:
+      description: Connect to real-time chat via WebSocket
+      parameters:
+      - description: Room ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: User ID
+        in: query
+        name: user_id
+        required: true
+        type: integer
+      responses: {}
+      summary: WebSocket for Chat Room
+      tags:
+      - chat
   /api/v1/users:
     post:
       consumes:

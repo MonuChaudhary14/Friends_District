@@ -19,6 +19,7 @@ func SetupRouter(db *gorm.DB) *gin.Engine {
 
 	userHandler := handlers.NewUserHandler(db)
 	friendHandler := handlers.NewFriendHandler(db)
+	chatHandler := handlers.NewChatHandler(db)
 
 	r.GET("/health", func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{
@@ -39,6 +40,14 @@ func SetupRouter(db *gorm.DB) *gin.Engine {
 			friends.POST("/request", friendHandler.SendFriendRequest)
 			friends.POST("/accept", friendHandler.AcceptFriendRequest)
 			friends.GET("", friendHandler.ListFriends)
+		}
+
+		rooms := v1.Group("/rooms")
+		{
+			rooms.POST("", chatHandler.CreateRoom)
+			rooms.POST("/:id/join", chatHandler.JoinRoom)
+			rooms.GET("/:id/messages", chatHandler.GetMessages)
+			rooms.GET("/:id/ws", chatHandler.ServeWS)
 		}
 	}
 
