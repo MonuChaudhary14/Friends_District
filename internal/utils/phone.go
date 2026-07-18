@@ -23,7 +23,7 @@ func ValidateAndNormalizePhone(phone string) (string, error) {
 		log.Printf("DEBUG VALIDATION FAIL: Original='%s', Processed='%s', Length=%d", originalPhone, phone, len(phone))
 		return "", errors.New("mobile number must be exactly 10 digits (without country code)")
 	}
-	
+
 	log.Printf("DEBUG VALIDATION SUCCESS: Original='%s', Final='%s'", originalPhone, phone)
 	return phone, nil
 }

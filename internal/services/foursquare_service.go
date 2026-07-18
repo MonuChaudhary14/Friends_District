@@ -73,7 +73,7 @@ func (s *FoursquareService) FetchDining() ([]models.ExternalEvent, error) {
 		if desc == "" {
 			desc = "Experience fine dining at " + venue.Name
 		}
-		
+
 		events = append(events, models.ExternalEvent{
 			ID:          "fsq_" + venue.FsqPlaceID,
 			Title:       venue.Name,

@@ -82,7 +82,7 @@ func (h *FriendHandler) SendFriendRequest(c *gin.Context) {
 		// Auto-accept the reciprocal request
 		reciprocal.Status = models.StatusAccepted
 		h.DB.Save(&reciprocal)
-		
+
 		// Create the new friendship as accepted
 		friendship = models.Friendship{
 			UserID:   user.ID,
@@ -90,7 +90,7 @@ func (h *FriendHandler) SendFriendRequest(c *gin.Context) {
 			Status:   models.StatusAccepted,
 		}
 		h.DB.Create(&friendship)
-		
+
 		c.JSON(http.StatusCreated, friendship)
 		return
 	}

@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"fmt"
 	"log"
 	"net/http"
 
@@ -81,7 +82,7 @@ func (h *EventHandler) ListEvents(c *gin.Context) {
 			log.Printf("Foursquare Error: %v", err)
 		}
 	}
-	
+
 	if len(allEvents) == 0 && len(errors) > 0 {
 		c.JSON(http.StatusInternalServerError, gin.H{"errors": errors, "events": allEvents})
 		return
@@ -100,10 +101,10 @@ func (h *EventHandler) ListEvents(c *gin.Context) {
 // @Failure 404 {object} map[string]interface{}
 // @Router /api/v1/events/{id} [get]
 func (h *EventHandler) GetEvent(c *gin.Context) {
-	// For this prototype, since we merge data, fetching a single event by ID across 2 different APIs 
+	// For this prototype, since we merge data, fetching a single event by ID across 2 different APIs
 	// would require knowing which API the ID belongs to. The frontend usually passes the type, or we search both.
 	// We'll leave a simple stub here that tells the client to use the list endpoint, or we can implement a search.
-	
+
 	c.JSON(http.StatusNotImplemented, gin.H{"error": "Single event lookup is not fully implemented for merged external APIs. Use the list endpoint."})
 }
 

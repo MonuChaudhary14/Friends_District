@@ -180,7 +180,7 @@ func (h *ChatHandler) InviteToRoom(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid inviter_phone: " + err.Error()})
 		return
 	}
-	
+
 	normInvitee, err := utils.ValidateAndNormalizePhone(req.InviteePhone)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid invitee_phone: " + err.Error()})
@@ -473,7 +473,7 @@ func (h *ChatHandler) AcceptRoomInvite(c *gin.Context) {
 
 	membership.Status = "joined"
 	membership.JoinedAt = time.Now()
-	
+
 	if err := h.DB.Save(&membership).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to accept invite"})
 		return
@@ -525,7 +525,7 @@ func (h *ChatHandler) RejectRoomInvite(c *gin.Context) {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Pending invite not found"})
 		return
 	}
-	
+
 	if err := h.DB.Delete(&membership).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to reject invite"})
 		return

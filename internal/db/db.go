@@ -7,7 +7,7 @@ import (
 
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
-	
+
 	"district-friends/internal/models"
 )
 

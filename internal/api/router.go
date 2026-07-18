@@ -5,9 +5,9 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
-	
-	"district-friends/internal/api/handlers"
+
 	_ "district-friends/docs"
+	"district-friends/internal/api/handlers"
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
 )
@@ -25,7 +25,7 @@ func SetupRouter(db *gorm.DB) *gin.Engine {
 
 	r.GET("/health", func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{
-			"status": "up",
+			"status":  "up",
 			"message": "Friends District API is running",
 		})
 	})
