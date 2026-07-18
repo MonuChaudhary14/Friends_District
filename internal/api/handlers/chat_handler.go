@@ -187,6 +187,7 @@ func (h *ChatHandler) InviteToRoom(c *gin.Context) {
 	member := models.ChatRoomMember{
 		RoomID:   uint(roomID),
 		UserID:   invitee.ID,
+		Status:   "pending",
 		JoinedAt: time.Now(),
 	}
 
@@ -381,8 +382,162 @@ func (h *ChatHandler) ListJoinedRooms(c *gin.Context) {
 	}
 
 	var members []models.ChatRoomMember
-	if err := h.DB.Where("user_id = ?", user.ID).Preload("Room").Find(&members).Error; err != nil {
+	if err := h.DB.Where("user_id = ? AND status = ?", user.ID, "joined").Preload("Room").Find(&members).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch joined rooms"})
+		return
+	}
+
+	rooms := []models.ChatRoom{}
+	for _, member := range members {
+		rooms = append(rooms, member.Room)
+	}
+
+	c.JSON(http.StatusOK, rooms)
+}
+
+type HandleRoomInviteReq struct {
+	UserPhone string `json:"user_phone" binding:"required"`
+}
+
+// @Summary Accept a room invite
+// @Description Accept a pending invitation to join a chat room
+// @Tags chat
+// @Accept json
+// @Produce json
+// @Param id path int true "Room ID"
+// @Param request body HandleRoomInviteReq true "User Phone"
+// @Success 200 {object} models.ChatRoomMember
+// @Failure 400 {object} map[string]interface{}
+// @Failure 404 {object} map[string]interface{}
+// @Failure 500 {object} map[string]interface{}
+// @Router /api/v1/rooms/{id}/accept [post]
+func (h *ChatHandler) AcceptRoomInvite(c *gin.Context) {
+	roomIDStr := c.Param("id")
+	roomID, err := strconv.Atoi(roomIDStr)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid room ID"})
+		return
+	}
+
+	var req HandleRoomInviteReq
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	normPhone, err := utils.ValidateAndNormalizePhone(req.UserPhone)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid user_phone"})
+		return
+	}
+
+	var user models.User
+	if err := h.DB.Where("mobile_number = ?", normPhone).First(&user).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
+		return
+	}
+
+	var membership models.ChatRoomMember
+	if err := h.DB.Where("room_id = ? AND user_id = ? AND status = ?", roomID, user.ID, "pending").First(&membership).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Pending invite not found"})
+		return
+	}
+
+	membership.Status = "joined"
+	membership.JoinedAt = time.Now()
+	
+	if err := h.DB.Save(&membership).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to accept invite"})
+		return
+	}
+
+	c.JSON(http.StatusOK, membership)
+}
+
+// @Summary Reject a room invite
+// @Description Reject a pending invitation to join a chat room
+// @Tags chat
+// @Accept json
+// @Produce json
+// @Param id path int true "Room ID"
+// @Param request body HandleRoomInviteReq true "User Phone"
+// @Success 200 {object} map[string]interface{}
+// @Failure 400 {object} map[string]interface{}
+// @Failure 404 {object} map[string]interface{}
+// @Failure 500 {object} map[string]interface{}
+// @Router /api/v1/rooms/{id}/reject [post]
+func (h *ChatHandler) RejectRoomInvite(c *gin.Context) {
+	roomIDStr := c.Param("id")
+	roomID, err := strconv.Atoi(roomIDStr)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid room ID"})
+		return
+	}
+
+	var req HandleRoomInviteReq
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	normPhone, err := utils.ValidateAndNormalizePhone(req.UserPhone)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid user_phone"})
+		return
+	}
+
+	var user models.User
+	if err := h.DB.Where("mobile_number = ?", normPhone).First(&user).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
+		return
+	}
+
+	var membership models.ChatRoomMember
+	if err := h.DB.Where("room_id = ? AND user_id = ? AND status = ?", roomID, user.ID, "pending").First(&membership).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Pending invite not found"})
+		return
+	}
+	
+	if err := h.DB.Delete(&membership).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to reject invite"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "Invite rejected"})
+}
+
+// @Summary List Pending Room Invites
+// @Description Get a list of chat rooms that the user has been invited to but hasn't joined
+// @Tags chat
+// @Produce json
+// @Param user_phone query string true "User Phone"
+// @Success 200 {array} models.ChatRoom
+// @Failure 400 {object} map[string]interface{}
+// @Failure 404 {object} map[string]interface{}
+// @Failure 500 {object} map[string]interface{}
+// @Router /api/v1/rooms/invites [get]
+func (h *ChatHandler) ListRoomInvites(c *gin.Context) {
+	userPhone := c.Query("user_phone")
+	if userPhone == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "user_phone is required"})
+		return
+	}
+
+	normPhone, err := utils.ValidateAndNormalizePhone(userPhone)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid user_phone"})
+		return
+	}
+
+	var user models.User
+	if err := h.DB.Where("mobile_number = ?", normPhone).First(&user).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
+		return
+	}
+
+	var members []models.ChatRoomMember
+	if err := h.DB.Where("user_id = ? AND status = ?", user.ID, "pending").Preload("Room").Find(&members).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch room invites"})
 		return
 	}
 

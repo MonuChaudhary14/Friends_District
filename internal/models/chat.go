@@ -18,6 +18,7 @@ type ChatRoomMember struct {
 	ID        uint      `gorm:"primarykey" json:"id"`
 	RoomID    uint      `gorm:"not null;index" json:"room_id"`
 	UserID    uint      `gorm:"not null;index" json:"user_id"`
+	Status    string    `gorm:"default:'joined'" json:"status"` // "pending" or "joined"
 	JoinedAt  time.Time `json:"joined_at"`
 
 	Room ChatRoom `gorm:"foreignKey:RoomID" json:"-"`

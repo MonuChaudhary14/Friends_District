@@ -73,6 +73,13 @@ definitions:
       username:
         type: string
     type: object
+  handlers.HandleRoomInviteReq:
+    properties:
+      user_phone:
+        type: string
+    required:
+    - user_phone
+    type: object
   handlers.InviteRoomReq:
     properties:
       invitee_phone:
@@ -145,6 +152,9 @@ definitions:
         type: string
       room_id:
         type: integer
+      status:
+        description: '"pending" or "joined"'
+        type: string
       user_id:
         type: integer
     type: object
@@ -771,6 +781,48 @@ paths:
       summary: Create a chat room
       tags:
       - chat
+  /api/v1/rooms/{id}/accept:
+    post:
+      consumes:
+      - application/json
+      description: Accept a pending invitation to join a chat room
+      parameters:
+      - description: Room ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: User Phone
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.HandleRoomInviteReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.ChatRoomMember'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Accept a room invite
+      tags:
+      - chat
   /api/v1/rooms/{id}/invite:
     post:
       consumes:
@@ -887,6 +939,49 @@ paths:
       summary: Get room messages
       tags:
       - chat
+  /api/v1/rooms/{id}/reject:
+    post:
+      consumes:
+      - application/json
+      description: Reject a pending invitation to join a chat room
+      parameters:
+      - description: Room ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: User Phone
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.HandleRoomInviteReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Reject a room invite
+      tags:
+      - chat
   /api/v1/rooms/{id}/share:
     post:
       consumes:
@@ -940,6 +1035,43 @@ paths:
         type: string
       responses: {}
       summary: WebSocket for Chat Room
+      tags:
+      - chat
+  /api/v1/rooms/invites:
+    get:
+      description: Get a list of chat rooms that the user has been invited to but
+        hasn't joined
+      parameters:
+      - description: User Phone
+        in: query
+        name: user_phone
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.ChatRoom'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: List Pending Room Invites
       tags:
       - chat
 swagger: "2.0"
