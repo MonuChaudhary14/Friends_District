@@ -12,12 +12,14 @@ import (
 type EventHandler struct {
 	TMDB         *services.TMDBService
 	Ticketmaster *services.TicketmasterService
+	Foursquare   *services.FoursquareService
 }
 
 func NewEventHandler() *EventHandler {
 	return &EventHandler{
 		TMDB:         services.NewTMDBService(),
 		Ticketmaster: services.NewTicketmasterService(),
+		Foursquare:   services.NewFoursquareService(),
 	}
 }
 
@@ -47,6 +49,14 @@ func (h *EventHandler) ListEvents(c *gin.Context) {
 		concerts, err := h.Ticketmaster.FetchConcerts()
 		if err == nil {
 			allEvents = append(allEvents, concerts...)
+		}
+	}
+
+	// Fetch Dining
+	if eventType == "" || eventType == "dining" || eventType == "restaurant" {
+		dining, err := h.Foursquare.FetchDining()
+		if err == nil {
+			allEvents = append(allEvents, dining...)
 		}
 	}
 

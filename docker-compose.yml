@@ -26,6 +26,7 @@ services:
       PORT: 8043
       TMDB_API_Key: ${TMDB_API_Key}
       Ticketmaster_Consumer_Key: ${Ticketmaster_Consumer_Key}
+      Foursquare_SERVICE_API: ${Foursquare_SERVICE_API}
     depends_on:
       - db
 
