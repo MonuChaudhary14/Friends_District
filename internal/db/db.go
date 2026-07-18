@@ -28,11 +28,13 @@ func InitDB() *gorm.DB {
 
 	err = db.AutoMigrate(
 		&models.User{},
-		&models.Friendship{},
+		&models.Booking{},
 		&models.ChatRoom{},
 		&models.ChatRoomMember{},
 		&models.Message{},
-		&models.Booking{},
+		&models.MessageVote{},
+		&models.ExternalEvent{},
+		&models.Friendship{},
 	)
 	if err != nil {
 		log.Fatalf("Failed to migrate database: %v", err)

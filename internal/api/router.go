@@ -67,6 +67,11 @@ func SetupRouter(db *gorm.DB, hub *ws.Hub) *gin.Engine {
 			rooms.POST("/:id/share", chatHandler.ShareEvent)
 		}
 
+		messages := v1.Group("/messages")
+		{
+			messages.POST("/:id/vote", chatHandler.VoteMessage)
+		}
+
 		events := v1.Group("/events")
 		{
 			events.GET("/spotlight", eventHandler.GetSpotlight)

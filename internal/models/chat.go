@@ -30,10 +30,24 @@ type Message struct {
 	RoomID            uint      `gorm:"not null;index" json:"room_id"`
 	SenderID          uint      `gorm:"not null;index" json:"sender_id"`
 	Content           string    `gorm:"type:text;not null" json:"content"`
-	ExternalEventID   string    `json:"external_event_id,omitempty"`   // String ID from external API (TMDB/Ticketmaster)
-	ExternalEventType string    `json:"external_event_type,omitempty"` // "movie" or "concert"
-	CreatedAt         time.Time `json:"created_at"`
+	ExternalEventID       string    `json:"external_event_id,omitempty"`   // String ID from external API (TMDB/Ticketmaster)
+	ExternalEventType     string    `json:"external_event_type,omitempty"` // "movie" or "concert"
+	ExternalEventName     string    `json:"external_event_name,omitempty"`
+	ExternalEventImageURL string    `json:"external_event_image_url,omitempty"`
+	CreatedAt             time.Time `json:"created_at"`
 
-	Room   ChatRoom `gorm:"foreignKey:RoomID" json:"-"`
-	Sender User     `gorm:"foreignKey:SenderID" json:"sender,omitempty"`
+	Room   ChatRoom      `gorm:"foreignKey:RoomID" json:"-"`
+	Sender User          `gorm:"foreignKey:SenderID" json:"sender,omitempty"`
+	Votes  []MessageVote `gorm:"foreignKey:MessageID" json:"votes,omitempty"`
+}
+
+type MessageVote struct {
+	ID        uint      `gorm:"primarykey" json:"id"`
+	MessageID uint      `gorm:"not null;index" json:"message_id"`
+	UserID    uint      `gorm:"not null;index" json:"user_id"`
+	Vote      string    `gorm:"not null" json:"vote"` // "interested", "maybe", "not_interested"
+	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
+
+	User User `gorm:"foreignKey:UserID" json:"user,omitempty"`
 }

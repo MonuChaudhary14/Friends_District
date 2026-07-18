@@ -248,7 +248,7 @@ func (h *ChatHandler) GetMessages(c *gin.Context) {
 	}
 
 	var messages []models.Message
-	if err := h.DB.Preload("Sender").Where("room_id = ?", roomID).Order("created_at asc").Find(&messages).Error; err != nil {
+	if err := h.DB.Preload("Sender").Preload("Votes").Where("room_id = ?", roomID).Order("created_at asc").Find(&messages).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch messages"})
 		return
 	}
@@ -304,9 +304,11 @@ func (h *ChatHandler) ServeWS(c *gin.Context) {
 }
 
 type ShareEventReq struct {
-	UserPhone         string `json:"user_phone" binding:"required"`
-	ExternalEventID   string `json:"external_event_id" binding:"required"`
-	ExternalEventType string `json:"external_event_type" binding:"required"`
+	UserPhone             string `json:"user_phone" binding:"required"`
+	ExternalEventID       string `json:"external_event_id" binding:"required"`
+	ExternalEventType     string `json:"external_event_type" binding:"required"`
+	ExternalEventName     string `json:"external_event_name" binding:"required"`
+	ExternalEventImageURL string `json:"external_event_image_url" binding:"required"`
 }
 
 // @Summary Share an external event in a chat room
@@ -348,12 +350,14 @@ func (h *ChatHandler) ShareEvent(c *gin.Context) {
 	}
 
 	msg := models.Message{
-		RoomID:            uint(roomID),
-		SenderID:          user.ID,
-		ExternalEventID:   req.ExternalEventID,
-		ExternalEventType: req.ExternalEventType,
-		Content:           "Check out this " + req.ExternalEventType + " event!",
-		CreatedAt:         time.Now(),
+		RoomID:                uint(roomID),
+		SenderID:              user.ID,
+		ExternalEventID:       req.ExternalEventID,
+		ExternalEventType:     req.ExternalEventType,
+		ExternalEventName:     req.ExternalEventName,
+		ExternalEventImageURL: req.ExternalEventImageURL,
+		Content:               "Check out this " + req.ExternalEventType + " event!",
+		CreatedAt:             time.Now(),
 	}
 
 	if err := h.DB.Create(&msg).Error; err != nil {
@@ -597,4 +601,94 @@ func (h *ChatHandler) ListRoomMembers(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, users)
+}
+
+type VoteMessageReq struct {
+	UserPhone string `json:"user_phone" binding:"required"`
+	Vote      string `json:"vote" binding:"required"` // "interested", "maybe", "not_interested"
+}
+
+// @Summary Vote on a shared event message
+// @Description Cast or update a vote on a message containing an external event
+// @Tags chat
+// @Accept json
+// @Produce json
+// @Param id path int true "Message ID"
+// @Param request body VoteMessageReq true "Vote Details"
+// @Success 200 {object} models.MessageVote
+// @Failure 400 {object} map[string]interface{}
+// @Failure 404 {object} map[string]interface{}
+// @Failure 500 {object} map[string]interface{}
+// @Router /api/v1/messages/{id}/vote [post]
+func (h *ChatHandler) VoteMessage(c *gin.Context) {
+	messageIDStr := c.Param("id")
+	messageID, err := strconv.Atoi(messageIDStr)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid message ID"})
+		return
+	}
+
+	var req VoteMessageReq
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	if req.Vote != "interested" && req.Vote != "maybe" && req.Vote != "not_interested" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid vote type"})
+		return
+	}
+
+	normPhone, err := utils.ValidateAndNormalizePhone(req.UserPhone)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid user_phone"})
+		return
+	}
+
+	var user models.User
+	if err := h.DB.Where("mobile_number = ?", normPhone).First(&user).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
+		return
+	}
+
+	var msg models.Message
+	if err := h.DB.First(&msg, messageID).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Message not found"})
+		return
+	}
+
+	var vote models.MessageVote
+	err = h.DB.Where("message_id = ? AND user_id = ?", messageID, user.ID).First(&vote).Error
+	if err != nil {
+		// Create new vote
+		vote = models.MessageVote{
+			MessageID: uint(messageID),
+			UserID:    user.ID,
+			Vote:      req.Vote,
+		}
+		if err := h.DB.Create(&vote).Error; err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create vote"})
+			return
+		}
+	} else {
+		// Update existing vote
+		vote.Vote = req.Vote
+		if err := h.DB.Save(&vote).Error; err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update vote"})
+			return
+		}
+	}
+
+	// Fetch updated message to broadcast
+	var updatedMsg models.Message
+	h.DB.Preload("Sender").Preload("Votes").First(&updatedMsg, messageID)
+
+	// Broadcast via WebSocket
+	broadcastMsg := ws.BroadcastMessage{
+		RoomID:  updatedMsg.RoomID,
+		Message: updatedMsg,
+	}
+	h.Hub.Broadcast <- broadcastMsg
+
+	c.JSON(http.StatusOK, vote)
 }
