@@ -187,7 +187,7 @@ func (h *FriendHandler) ListFriends(c *gin.Context) {
 		return
 	}
 
-	var friends []FriendResponse
+	friends := make([]FriendResponse, 0)
 	for _, f := range friendships {
 		friends = append(friends, FriendResponse{
 			User:   f.Friend,
