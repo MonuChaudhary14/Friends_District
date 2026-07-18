@@ -686,54 +686,6 @@ const docTemplate = `{
                 ],
                 "responses": {}
             }
-        },
-        "/api/v1/users": {
-            "post": {
-                "description": "Register a new user in the system",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "users"
-                ],
-                "summary": "Create a user",
-                "parameters": [
-                    {
-                        "description": "User Info",
-                        "name": "request",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/handlers.CreateUserRequest"
-                        }
-                    }
-                ],
-                "responses": {
-                    "201": {
-                        "description": "Created",
-                        "schema": {
-                            "$ref": "#/definitions/models.User"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    }
-                }
-            }
         }
     },
     "definitions": {
@@ -797,21 +749,6 @@ const docTemplate = `{
             ],
             "properties": {
                 "name": {
-                    "type": "string"
-                }
-            }
-        },
-        "handlers.CreateUserRequest": {
-            "type": "object",
-            "required": [
-                "email",
-                "username"
-            ],
-            "properties": {
-                "email": {
-                    "type": "string"
-                },
-                "username": {
                     "type": "string"
                 }
             }

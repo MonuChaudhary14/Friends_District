@@ -43,16 +43,6 @@ definitions:
     required:
     - name
     type: object
-  handlers.CreateUserRequest:
-    properties:
-      email:
-        type: string
-      username:
-        type: string
-    required:
-    - email
-    - username
-    type: object
   handlers.FriendRequestReq:
     properties:
       friend_phone:
@@ -691,36 +681,4 @@ paths:
       summary: WebSocket for Chat Room
       tags:
       - chat
-  /api/v1/users:
-    post:
-      consumes:
-      - application/json
-      description: Register a new user in the system
-      parameters:
-      - description: User Info
-        in: body
-        name: request
-        required: true
-        schema:
-          $ref: '#/definitions/handlers.CreateUserRequest'
-      produces:
-      - application/json
-      responses:
-        "201":
-          description: Created
-          schema:
-            $ref: '#/definitions/models.User'
-        "400":
-          description: Bad Request
-          schema:
-            additionalProperties: true
-            type: object
-        "500":
-          description: Internal Server Error
-          schema:
-            additionalProperties: true
-            type: object
-      summary: Create a user
-      tags:
-      - users
 swagger: "2.0"
