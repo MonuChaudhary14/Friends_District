@@ -65,15 +65,18 @@ func (h *BookingHandler) CreateBooking(c *gin.Context) {
 				return
 			}
 			bookedForID = &friend.ID
-			var friendship models.Friendship
-			err := h.DB.Where(
-				"((user_id = ? AND friend_id = ?) OR (user_id = ? AND friend_id = ?)) AND status = ?",
-				user.ID, *bookedForID, *bookedForID, user.ID, models.StatusAccepted,
-			).First(&friendship).Error
+			
+			if user.ID != friend.ID {
+				var friendship models.Friendship
+				err := h.DB.Where(
+					"((user_id = ? AND friend_id = ?) OR (user_id = ? AND friend_id = ?)) AND status = ?",
+					user.ID, *bookedForID, *bookedForID, user.ID, models.StatusAccepted,
+				).First(&friendship).Error
 
-			if err != nil {
-				c.JSON(http.StatusForbidden, gin.H{"error": "You can only book tickets for confirmed friends"})
-				return
+				if err != nil {
+					c.JSON(http.StatusForbidden, gin.H{"error": "You can only book tickets for confirmed friends"})
+					return
+				}
 			}
 		}
 	}
