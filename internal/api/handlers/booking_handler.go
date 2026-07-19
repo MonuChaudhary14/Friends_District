@@ -48,7 +48,7 @@ func (h *BookingHandler) CreateBooking(c *gin.Context) {
 	}
 
 	var user models.User
-	if err := h.DB.Where("username = ?", req.Username).First(&user).Error; err != nil {
+	if err := h.DB.Where("username = ? OR mobile_number = ?", req.Username, req.Username).First(&user).Error; err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
 		return
 	}
@@ -60,7 +60,7 @@ func (h *BookingHandler) CreateBooking(c *gin.Context) {
 			bookedForID = &user.ID
 		} else {
 			var friend models.User
-			if err := h.DB.Where("username = ?", *req.BookedForUsername).First(&friend).Error; err != nil {
+			if err := h.DB.Where("username = ? OR mobile_number = ?", *req.BookedForUsername, *req.BookedForUsername).First(&friend).Error; err != nil {
 				c.JSON(http.StatusNotFound, gin.H{"error": "Booked for user not found"})
 				return
 			}
