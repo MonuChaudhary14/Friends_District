@@ -27,6 +27,7 @@ type CreateBookingReq struct {
 	TotalPrice        float64 `json:"total_price"`
 	StartTime         *string `json:"start_time"`
 	EndTime           *string `json:"end_time"`
+	BookingDate       *string `json:"booking_date"`
 }
 
 // @Summary Create a Booking
@@ -90,6 +91,7 @@ func (h *BookingHandler) CreateBooking(c *gin.Context) {
 		TotalPrice:        req.TotalPrice,
 		StartTime:         req.StartTime,
 		EndTime:           req.EndTime,
+		BookingDate:       req.BookingDate,
 		Status:            "CONFIRMED",
 		CreatedAt:         time.Now(),
 	}

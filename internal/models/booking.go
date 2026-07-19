@@ -13,6 +13,7 @@ type Booking struct {
 	Status            string    `gorm:"not null;default:'CONFIRMED'" json:"status"`
 	StartTime         *string   `json:"start_time,omitempty"`
 	EndTime           *string   `json:"end_time,omitempty"`
+	BookingDate       *string   `json:"booking_date,omitempty"`
 	CreatedAt         time.Time `json:"created_at"`
 
 	User      User  `gorm:"foreignKey:UserID" json:"user"`
