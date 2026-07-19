@@ -56,22 +56,25 @@ func (h *BookingHandler) CreateBooking(c *gin.Context) {
 	var bookedForID *uint
 	// If booking for someone else, verify friendship
 	if req.BookedForUsername != nil {
+		if *req.BookedForUsername == req.Username {
+			bookedForID = &user.ID
+		} else {
+			var friend models.User
+			if err := h.DB.Where("username = ?", *req.BookedForUsername).First(&friend).Error; err != nil {
+				c.JSON(http.StatusNotFound, gin.H{"error": "Booked for user not found"})
+				return
+			}
+			bookedForID = &friend.ID
+			var friendship models.Friendship
+			err := h.DB.Where(
+				"((user_id = ? AND friend_id = ?) OR (user_id = ? AND friend_id = ?)) AND status = ?",
+				user.ID, *bookedForID, *bookedForID, user.ID, models.StatusAccepted,
+			).First(&friendship).Error
 
-		var friend models.User
-		if err := h.DB.Where("username = ?", *req.BookedForUsername).First(&friend).Error; err != nil {
-			c.JSON(http.StatusNotFound, gin.H{"error": "Booked for user not found"})
-			return
-		}
-		bookedForID = &friend.ID
-		var friendship models.Friendship
-		err := h.DB.Where(
-			"((user_id = ? AND friend_id = ?) OR (user_id = ? AND friend_id = ?)) AND status = ?",
-			user.ID, *bookedForID, *bookedForID, user.ID, models.StatusAccepted,
-		).First(&friendship).Error
-
-		if err != nil {
-			c.JSON(http.StatusForbidden, gin.H{"error": "You can only book tickets for confirmed friends"})
-			return
+			if err != nil {
+				c.JSON(http.StatusForbidden, gin.H{"error": "You can only book tickets for confirmed friends"})
+				return
+			}
 		}
 	}
 
