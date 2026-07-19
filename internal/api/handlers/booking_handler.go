@@ -121,7 +121,7 @@ func (h *BookingHandler) ListBookings(c *gin.Context) {
 	}
 
 	var user models.User
-	if err := h.DB.Where("username = ?", username).First(&user).Error; err != nil {
+	if err := h.DB.Where("username = ? OR mobile_number = ?", username, username).First(&user).Error; err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
 		return
 	}
