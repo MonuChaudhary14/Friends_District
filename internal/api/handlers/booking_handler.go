@@ -25,6 +25,8 @@ type CreateBookingReq struct {
 	ExternalEventType string  `json:"external_event_type" binding:"required"`
 	Quantity          int     `json:"quantity" binding:"required"`
 	TotalPrice        float64 `json:"total_price"`
+	StartTime         *string `json:"start_time"`
+	EndTime           *string `json:"end_time"`
 }
 
 // @Summary Create a Booking
@@ -80,6 +82,8 @@ func (h *BookingHandler) CreateBooking(c *gin.Context) {
 		ExternalEventType: req.ExternalEventType,
 		Quantity:          req.Quantity,
 		TotalPrice:        req.TotalPrice,
+		StartTime:         req.StartTime,
+		EndTime:           req.EndTime,
 		Status:            "CONFIRMED",
 		CreatedAt:         time.Now(),
 	}
